@@ -1,2 +1,2 @@
-# SPRUCE 🌲
-A framework dedicated to the generation of sparse,realistic and uncoupled counterfactual explanations on medical images.
+# SPRUCE - SParse Realistic Uncoupled Counterfactual Explanations
+A framework dedicated to the generation of counterfactual explanations on medical images.
