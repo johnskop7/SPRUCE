@@ -5,7 +5,6 @@ from PIL import Image
 from torchvision import transforms, datasets
 from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision.datasets import ImageFolder
-import pydicom
 from pydicom.pixels import apply_voi_lut
 
 logging.basicConfig(level=logging.INFO)
