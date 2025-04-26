@@ -20,8 +20,7 @@ from utils.piece_utils import (
     modifying_exceptional_features
 )
 from utils.io_utils import load_reconstructed_image
-
-sys.path.append("/home/ubuntu/PTI")  # adjust or remove as needed
+import torch_utils
 
 def apply_piece_to_image(
     gan_model_path: str,

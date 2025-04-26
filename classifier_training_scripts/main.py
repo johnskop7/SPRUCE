@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 from load_dataloaders import load_data
-from model_class import CustomResNet50, CustomConvNeXt
+from models.ConvNeXt import CustomConvNeXt
+from models.ResNet50 import CustomResNet50
 from train_functions import setup_logger, train_model, evaluate_model, validate_clean
 import argparse
 import os
