@@ -60,7 +60,7 @@ def process_all_generators(checkpoints_dir, embeddings_dir, old_generator_path,
                            output_dir, original_images_dir):
     """Processes all fine-tuned generators: invert, compare and save results."""
     os.makedirs(output_dir, exist_ok=True)
-    comparison_output_dir       = os.path.join(output_dir, "comparisons")
+    comparison_output_dir       = os.path.join(output_dir, "inversion_comparisons")
     inverted_images_output_dir  = os.path.join(output_dir, "inverted_images")
     os.makedirs(comparison_output_dir, exist_ok=True)
     os.makedirs(inverted_images_output_dir, exist_ok=True)

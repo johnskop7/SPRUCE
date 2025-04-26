@@ -4,28 +4,28 @@ gan:
   checkpoints_dir: "/home/ubuntu/checkpoints/cardiomegaly"
   embeddings_dir: "/home/ubuntu/embeddings_big/cardiomegaly/PTI"
   original_images_dir: "/home/ubuntu/test_images_cardiomegaly"
-  output_dir: "/home/ubuntu/experiment_3"
+  output_dir: "/home/ubuntu/experiment_2"
 
 # classifier model settings
 classifier:
   type: "convnext"
-  weights: "/home/ubuntu/cardiomegaly_to_normal_exp1/convnext_exp1.pth"
+  weights: "/home/ubuntu/cardiomegaly_to_normal_exp9/convnext_normal_cardiomegaly_linf_exp9.pth"
   num_classes: 2
   normalized: true
 
 # PIECE settings
 piece:
   counterfactual_class: 1
-  class_activations: "/home/ubuntu/cardiomegaly_to_normal_exp1/class_activations_exp1.pkl"
-  alpha: 0.1
+  class_activations: "/home/ubuntu/cardiomegaly_to_normal_exp9/class_activations_normal_cardiomegaly_linf_exp9.pkl"
+  alpha: 0.05
   n_components: 5
 
 # Optimization
 opt:
   lr: 0.02
-  epochs: 100
+  epochs: 200
   lambda_piece: 1.0
-  lambda_perc: 0.01
-  lambda_latent: 1e-3
+  lambda_perc: 0.1
+  lambda_latent: 1e-4
   lambda_image: 1e-6
   image_size: 256
