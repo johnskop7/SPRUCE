@@ -20,17 +20,17 @@ from piece_utils import (
 )
 
 
-def load_npz_latent_vector(npz_path: str) -> torch.Tensor:
-    """
-    Load the latent vector from a .npz file and return it as a PyTorch tensor.
-    """
-    data = np.load(npz_path)
-    if "w" not in data:
-        raise ValueError(f"No 'w' key found in {npz_path}")
-    tensor = torch.tensor(data["w"], dtype=torch.float32)
-    if torch.cuda.is_available():
-        tensor = tensor.cuda()
-    return tensor
+# def load_npz_latent_vector(npz_path: str) -> torch.Tensor:
+#     """
+#     Load the latent vector from a .npz file and return it as a PyTorch tensor.
+#     """
+#     data = np.load(npz_path)
+#     if "w" not in data:
+#         raise ValueError(f"No 'w' key found in {npz_path}")
+#     tensor = torch.tensor(data["w"], dtype=torch.float32)
+#     if torch.cuda.is_available():
+#         tensor = tensor.cuda()
+#     return tensor
 
 
 def apply_piece_to_image(

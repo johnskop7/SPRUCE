@@ -10,12 +10,9 @@ import cv2
 import matplotlib.pyplot as plt
 import argparse
 import warnings
-
+import sys
 warnings.filterwarnings("ignore")  # Suppress warnings
-
-def load_image(image_path):
-    """Loads an image from a file and converts it to RGB format."""
-    return np.array(Image.open(image_path).convert("RGB"))
+sys.path.append("/home/ubuntu/PTI")  # adjust or remove as needed
 
 def compute_difference_image(img1, img2):
     """
@@ -25,36 +22,6 @@ def compute_difference_image(img1, img2):
     diff_3ch = np.abs(img1.astype(np.int16) - img2.astype(np.int16)).astype(np.uint8)
     diff_gray = cv2.cvtColor(diff_3ch, cv2.COLOR_RGB2GRAY)
     return diff_gray
-
-def plot_images(images, titles, save_path=None, cmaps=None):
-    """Plots multiple images side by side with their respective titles."""
-    fig, axes = plt.subplots(1, len(images), figsize=(15, 5))
-    for i, (ax, img, title) in enumerate(zip(axes, images, titles)):
-        cmap = cmaps[i] if cmaps else None
-        ax.imshow(img, cmap=cmap)
-        ax.axis('off')
-        ax.set_title(title, fontsize=12)
-    plt.tight_layout()
-    if save_path:
-        plt.savefig(save_path)
-        print(f"Comparison image saved to {save_path}")
-    plt.show()
-
-def save_tensor_as_png(image_tensor, filename):
-    """Saves a PyTorch tensor as a PNG image."""
-    image_tensor = image_tensor.squeeze(0).detach().cpu()
-    if image_tensor.min().item() < 0:
-        image_tensor = (image_tensor + 1) / 2.0
-    image_tensor = torch.clamp(image_tensor, 0, 1)
-    image_pil = TF.to_pil_image(image_tensor)
-    image_pil.save(filename)
-
-def save_latent_as_npz(latent_vector_path, npz_path):
-    """Converts and saves a PyTorch latent vector tensor to a NumPy .npz file."""
-    latent_vector = torch.load(latent_vector_path, map_location="cpu")
-    if isinstance(latent_vector, torch.Tensor):
-        np.savez(npz_path, w=latent_vector.detach().cpu().numpy())
-        print(f"Latent vector saved to {npz_path}")
 
 def save_inverted_image(image, output_path):
     """Saves an image (numpy array) as a PNG file."""
@@ -76,15 +43,46 @@ def load_generators(old_generator_path, new_generator_path):
         print(f"Error loading generators: {e}")
         return None, None
 
+def plot_counterfactual_grid(orig, before, after, diff_before, diff_after, save_path=None):
+    """
+    Top row:    [ Original | Inversion | After PTI ]
+    Bottom row: [ Black    | Δ(Inversion) | Δ(After PTI) ]
+    Diffs are shown in 'magma' cmap.
+    """
+    # create figure + axes
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+
+    # --- Top row ---
+    titles_top = ["Original", "Before PTI", "After PTI"]
+    for ax, img, title in zip(axes[0], (orig, before, after), titles_top):
+        ax.imshow(img, cmap='gray')
+        ax.set_title(title, fontsize=14)
+        ax.axis('off')
+
+    # --- Bottom row ---
+    black = np.zeros_like(orig)
+    bottom_imgs = [black, diff_before, diff_after]
+    titles_bot  = ["", "Diff: Orig vs Before", "Diff: Orig vs After"]
+    for ax, img, title in zip(axes[1], bottom_imgs, titles_bot):
+        cmap = 'magma' if img is not black else 'gray'
+        ax.imshow(img, cmap=cmap)
+        ax.set_title(title, fontsize=14)
+        ax.axis('off')
+
+    plt.tight_layout()
+    if save_path:
+        plt.savefig(save_path)
+        print(f"Saved comparison grid to {save_path}")
+    plt.show()
+
+
 def process_all_generators(checkpoints_dir, embeddings_dir, old_generator_path,
                            output_dir, original_images_dir):
     """Processes all fine-tuned generators: invert, compare and save results."""
     os.makedirs(output_dir, exist_ok=True)
     comparison_output_dir       = os.path.join(output_dir, "comparisons")
-    npz_output_dir              = os.path.join(output_dir, "npz")
     inverted_images_output_dir  = os.path.join(output_dir, "inverted_images")
     os.makedirs(comparison_output_dir, exist_ok=True)
-    os.makedirs(npz_output_dir, exist_ok=True)
     os.makedirs(inverted_images_output_dir, exist_ok=True)
 
     generator_files = [f for f in os.listdir(checkpoints_dir) if f.endswith(".pt")]
@@ -97,9 +95,8 @@ def process_all_generators(checkpoints_dir, embeddings_dir, old_generator_path,
 
         image_name              = "_".join(parts[2:])[:-3]  # strip ".pt"
         new_generator_path      = os.path.join(checkpoints_dir, generator_file)
-        latent_vector_path      = os.path.join(embeddings_dir, image_name, "0.pt")
+        latent_vector_path      = os.path.join(embeddings_dir, "PTI",image_name, "0.pt")
         original_image_path     = os.path.join(original_images_dir, f"{image_name}.png")
-        npz_output_path         = os.path.join(npz_output_dir, f"{image_name}.npz")
         inverted_image_output   = os.path.join(inverted_images_output_dir, f"{image_name}.png")
 
         if not os.path.exists(latent_vector_path) or not os.path.exists(original_image_path):
@@ -111,9 +108,6 @@ def process_all_generators(checkpoints_dir, embeddings_dir, old_generator_path,
             continue
 
         try:
-            # Save latent vector as .npz
-            save_latent_as_npz(latent_vector_path, npz_output_path)
-
             # Load pivot latent and synthesize
             w_pivot = torch.load(latent_vector_path,
                                  map_location="cuda" if torch.cuda.is_available() else "cpu")
@@ -125,7 +119,7 @@ def process_all_generators(checkpoints_dir, embeddings_dir, old_generator_path,
                             .clamp(0,255).to(torch.uint8).cpu().numpy()[0]
             new_image = (new_img_tensor.permute(0,2,3,1) * 127.5 + 128)\
                             .clamp(0,255).to(torch.uint8).cpu().numpy()[0]
-            original_image = load_image(original_image_path)
+            original_image = np.array(Image.open(original_image_path).convert("RGB"))
 
             # Compute diffs
             old_diff = compute_difference_image(original_image, old_image)
@@ -134,14 +128,15 @@ def process_all_generators(checkpoints_dir, embeddings_dir, old_generator_path,
             # Save inverted image (new)
             save_inverted_image(new_image, inverted_image_output)
 
-            # Plot and save comparison grid
             comparison_path = os.path.join(comparison_output_dir,
                                            f"{image_name}_comparison.png")
-            plot_images(
-                [original_image, old_image, old_diff, new_image, new_diff],
-                ["Original", "Before PTI", "Diff", "After PTI", "Final Diff"],
-                save_path=comparison_path,
-                cmaps=[None, None, 'magma', None, 'magma']
+            plot_counterfactual_grid(
+                orig=original_image,
+                before=old_image,
+                after=new_image,
+                diff_before=old_diff,
+                diff_after=new_diff,
+                save_path=comparison_path
             )
 
         except Exception as e:
