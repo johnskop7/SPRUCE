@@ -10,17 +10,11 @@ import matplotlib.pyplot as plt
 import argparse
 import warnings
 import sys
+import torch_utils
+from utils.model_utils import load_generators
+from utils.io_utils import compute_difference_image
 warnings.filterwarnings("ignore")  # Suppress warnings
-sys.path.append("/home/ubuntu/PTI")  # adjust or remove as needed
 
-def compute_difference_image(img1, img2):
-    """
-    Computes the absolute difference between two images (both assumed to be RGB)
-    and returns a single-channel (grayscale) difference image so colormaps can apply.
-    """
-    diff_3ch = np.abs(img1.astype(np.int16) - img2.astype(np.int16)).astype(np.uint8)
-    diff_gray = cv2.cvtColor(diff_3ch, cv2.COLOR_RGB2GRAY)
-    return diff_gray
 
 def save_inverted_image(image, output_path):
     """Saves an image (numpy array) as a PNG file."""
@@ -28,19 +22,6 @@ def save_inverted_image(image, output_path):
     image_pil.save(output_path)
     print(f"Inverted image saved to {output_path}")
 
-def load_generators(old_generator_path, new_generator_path):
-    """Loads the old and new StyleGAN generators."""
-    try:
-        with open(old_generator_path, 'rb') as f:
-            old_G = pickle.load(f)['G_ema']
-        with open(new_generator_path, 'rb') as f_new:
-            new_G = torch.load(f_new, map_location="cuda" if torch.cuda.is_available() else "cpu")
-        if torch.cuda.is_available():
-            old_G, new_G = old_G.cuda(), new_G.cuda()
-        return old_G, new_G
-    except Exception as e:
-        print(f"Error loading generators: {e}")
-        return None, None
 
 def plot_counterfactual_grid(orig, before, after, diff_before, diff_after, save_path=None):
     """

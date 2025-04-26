@@ -21,3 +21,18 @@ def load_classifier_model(classifier_type, model_weights=None, num_classes=2):
 
     model.eval()  # Set to evaluation mode by default
     return model
+
+
+def load_generators(old_generator_path, new_generator_path):
+    """Loads the old and new StyleGAN generators."""
+    try:
+        with open(old_generator_path, 'rb') as f:
+            old_G = pickle.load(f)['G_ema']
+        with open(new_generator_path, 'rb') as f_new:
+            new_G = torch.load(f_new, map_location="cuda" if torch.cuda.is_available() else "cpu")
+        if torch.cuda.is_available():
+            old_G, new_G = old_G.cuda(), new_G.cuda()
+        return old_G, new_G
+    except Exception as e:
+        print(f"Error loading generators: {e}")
+        return None, None

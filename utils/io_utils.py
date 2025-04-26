@@ -1,5 +1,6 @@
 import torch
 import imageio
+import cv2
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from IPython.display import HTML
@@ -11,22 +12,24 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import lpips
-import kornia
-import kornia.morphology as km
 
 
-def load_original_image(image_path, device, size=256):
-    """Load and preprocess the original image from PNG format."""
-    transform = transforms.Compose([
-        transforms.Resize((size, size)),
-        transforms.ToTensor(),
-        transforms.Normalize([0.5], [0.5])  # Normalize to [-1,1] (StyleGAN format)
-    ])
 
-    image = Image.open(image_path).convert("RGB")  # Ensure RGB mode
-    image = transform(image).unsqueeze(0).to(device)  # Add batch dimension
-    return image
+def tensor_to_numpy(img_tensor: torch.Tensor) -> np.ndarray:
+    """Convert a [1,C,H,W] tensor in [0,1] to an HxWxC uint8 NumPy array."""
+    t = img_tensor.squeeze(0).detach().cpu()
+    arr = (t.permute(1, 2, 0).numpy() * 255).astype(np.uint8)
+    return arr
 
+
+def compute_difference_image(img1, img2):
+    """
+    Computes the absolute difference between two images (both assumed to be RGB)
+    and returns a single-channel (grayscale) difference image so colormaps can apply.
+    """
+    diff_3ch = np.abs(img1.astype(np.int16) - img2.astype(np.int16)).astype(np.uint8)
+    diff_gray = cv2.cvtColor(diff_3ch, cv2.COLOR_RGB2GRAY)
+    return diff_gray
 
 
 
@@ -140,105 +143,6 @@ def update(frame, ax, number_of_classes=2, normalized=False):
     ax.text(0.5, -0.1, prob_text, ha='center', va='top', transform=ax.transAxes, fontsize=10)
     ax.axis("off")  # Hide axes for a cleaner view
     return ax
-
-def latent_vector_optimization(
-    generator,
-    w_plus_init,
-    device,
-    classifier,
-    ideal_xp,
-    original_image,
-    epochs=100,
-    learning_rate=0.01,
-    lambda_piece=1.0,
-    lambda_perc=0.5,
-    lambda_latent=1e-2,
-    lambda_image=0.1,
-    image_size=256,
-    normalized=False
-):
-
-
-    # 1. Convert the original image (NumPy) to a torch.Tensor in [-1,1]
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Resize((image_size, image_size)),
-        transforms.Normalize([0.5] * 3, [0.5] * 3)
-    ])
-    original_image = transform(original_image).unsqueeze(0).to(device)  # [B, C, H, W]
-
-    # 2. Initialize w_e as a trainable copy of w_plus_init
-    w_e = w_plus_init.clone().detach().to(device).requires_grad_(True)
-
-    # 3. Set up an optimizer for the entire latent vector
-    optimizer = optim.AdamW([w_e], lr=learning_rate, betas=(0.9, 0.99))
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-6)
-
-    # 4. Define loss functions
-    lpips_fn = lpips.LPIPS(net='vgg').to(device)
-    mse_loss = nn.MSELoss()
-
-    images_for_gif = []
-
-    for epoch in range(epochs):
-        optimizer.zero_grad()
-
-        # Generate an image from the current latent vector
-        image = generator.synthesis(w_e, noise_mode='const', force_fp32=True)
-
-        # Calculate LPIPS loss
-        lpips_loss = lpips_fn(image, original_image).mean()
-
-        # Calculate normalized L1 difference
-        image_diff_l1 = torch.norm(image - original_image, p=1)
-        num_pixels = image.numel()
-        l1_norm_normalized = image_diff_l1 / num_pixels
-
-        # Shift image to [0,1] for classifier input if needed
-        image = (image * 0.5 + 0.5).clamp(0, 1)
-
-        # Preprocess if the classifier expects normalized input
-        if normalized:
-            image_preproc = preprocess_for_classifier(image)
-        else:
-            image_preproc = image
-
-        # Forward pass through classifier
-        logits, feats = classifier(image_preproc, return_features=True)
-
-        # Feature alignment loss (PIECE)
-        piece_loss = mse_loss(feats[0], ideal_xp)
-
-        # Latent regularization (L1)
-        latent_reg = torch.norm(w_e - w_plus_init.to(device), p=1)
-
-        # Final combined loss
-        loss = (
-            lambda_piece * piece_loss +
-            lambda_perc * lpips_loss +
-            lambda_latent * latent_reg +
-            lambda_image * image_diff_l1
-        )
-        loss.backward()
-
-        # Gradient clipping
-        torch.nn.utils.clip_grad_norm_([w_e], max_norm=1.0)
-
-        optimizer.step()
-        scheduler.step()
-
-        with torch.no_grad():
-            probs = torch.softmax(logits, dim=1).cpu()
-            images_for_gif.append((image_preproc.squeeze(0).cpu(), probs))
-
-        if epoch % 2 == 0:
-            print(
-                f"[Epoch {epoch}/{epochs}] Loss={loss.item():.4f} | "
-                f"Piece={piece_loss.item():.4f} | LPIPS={lpips_loss.item():.4f} | "
-                f"L1={l1_norm_normalized.item():.4f}"
-            )
-
-    return w_e.detach(), images_for_gif
 
 
 def preprocess_for_classifier(image_tensor):

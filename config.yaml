@@ -6,8 +6,8 @@ gan:
   original_images_dir: "/home/ubuntu/test_images_cardiomegaly"
   output_dir: "/home/ubuntu/experiment_3"
 
-# CNN model settings
-cnn:
+# classifier model settings
+classifier:
   type: "convnext"
   weights: "/home/ubuntu/cardiomegaly_to_normal_exp1/convnext_exp1.pth"
   num_classes: 2
@@ -26,6 +26,6 @@ opt:
   epochs: 100
   lambda_piece: 1.0
   lambda_perc: 0.01
-  lambda_latent: 1e-4
-  lambda_image: 1e-7
+  lambda_latent: 1e-3
+  lambda_image: 1e-6
   image_size: 256

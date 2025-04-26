@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 import sys
 import pickle
@@ -9,9 +8,6 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 import warnings
-# ignore numpy.core.numeric deprecation
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-os.environ['TORCH_CUDA_ARCH_LIST'] = "8.6"
 from utils.model_utils import load_classifier_model
 from utils.piece_utils import (
     precompute_gmms_for_class,
@@ -21,6 +17,10 @@ from utils.piece_utils import (
 )
 from utils.io_utils import load_reconstructed_image
 import torch_utils
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+os.environ['TORCH_CUDA_ARCH_LIST'] = "8.6" #just to suppress a warning
+
 
 def apply_piece_to_image(
     gan_model_path: str,
@@ -185,19 +185,19 @@ if __name__ == "__main__":
         cfg = yaml.safe_load(f)
 
     gan_cfg   = cfg["gan"]
-    cnn_cfg   = cfg["cnn"]
+    classifier_cfg   = cfg["classifier"]
     piece_cfg = cfg["piece"]
 
     batch_process_piece(
         checkpoints_dir      = gan_cfg["checkpoints_dir"],
         embeddings_dir      = gan_cfg["embeddings_dir"],
-        classifier_type      = cnn_cfg["type"],
-        model_weights        = cnn_cfg["weights"],
+        classifier_type      = classifier_cfg["type"],
+        model_weights        = classifier_cfg["weights"],
         counterfactual_class = piece_cfg["counterfactual_class"],
         class_activations    = piece_cfg["class_activations"],
         alpha                = piece_cfg["alpha"],
         output_dir           = gan_cfg["output_dir"],
-        num_classes          = cnn_cfg["num_classes"],
-        normalized           = cnn_cfg["normalized"],
+        num_classes          = classifier_cfg["num_classes"],
+        normalized           = classifier_cfg["normalized"],
         n_components         = piece_cfg["n_components"]
     )
