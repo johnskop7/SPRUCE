@@ -12,14 +12,14 @@ import warnings
 # ignore numpy.core.numeric deprecation
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 os.environ['TORCH_CUDA_ARCH_LIST'] = "8.6"
-from utils.cnn_models import load_cnn_model
+from utils.model_utils import load_classifier_model
 from utils.piece_utils import (
     precompute_gmms_for_class,
     acquire_feature_probabilities,
     filter_df_of_exceptional_noise,
-    modifying_exceptional_features,
-    load_reconstructed_image
+    modifying_exceptional_features
 )
+from utils.io_utils import load_reconstructed_image
 
 sys.path.append("/home/ubuntu/PTI")  # adjust or remove as needed
 
@@ -34,17 +34,16 @@ def apply_piece_to_image(
     precomputed_gmms: list,
     classifier_type: str,
     device: torch.device
-) -> int:
+) -> tuple[int,any]:
     """
     Applies PIECE to one image:
       - loads GAN & latent
       - synthesizes initial image
       - acquires & filters feature probs
       - builds counterfactual feature vector
-      - saves cf vector + ws
+      - saves cf vector + pivotal latent vector
     Returns number of features changed.
     """
-    #print(f"\n▶ Processing {latent_vector_path} with {gan_model_path}")
 
     #Load the finetuned generator
     if gan_model_path.endswith(".pkl"):
@@ -59,7 +58,7 @@ def apply_piece_to_image(
     w_pivot = torch.load(latent_vector_path,map_location="cuda" if torch.cuda.is_available() else "cpu",weights_only=False)
 
     #Load the reconstructed version of the query image and print the respective class probabilities of the classifier
-    reconstructed_img = load_reconstructed_image(
+    reconstructed_img,probs = load_reconstructed_image(
         w_pivot, classifier, device, gan, normalized
     )
 
@@ -79,7 +78,6 @@ def apply_piece_to_image(
         alpha=alpha, classifier_type=classifier_type
     ).sort_values("Probability of Event")
 
-    #print(f"  • Features to change: {len(df)}")
 
     #Change the Exceptional to the Expected and create the counterfactual feature vector
     _, feats = classifier(reconstructed_img, return_features=True)
@@ -90,10 +88,9 @@ def apply_piece_to_image(
     #Save the counterfactual feature vector along with the respective pivotal latent vector
     with open(output_pickle_path, "wb") as f:
         pickle.dump({"cf_feature_vector": cf_x, "ws": w_pivot}, f)
-    #print(f"  ✓ Saved CF vector → {output_pickle_path}")
-    #print("---------------------------------------------------------------------------------")
 
-    return len(df)
+
+    return len(df),probs
 
 
 def batch_process_piece(
@@ -134,7 +131,7 @@ def batch_process_piece(
     )
 
     print("Loading classifier model...")
-    classifier = load_cnn_model(classifier_type=classifier_type,
+    classifier = load_classifier_model(classifier_type=classifier_type,
                          model_weights=model_weights,
                          num_classes=num_classes).to(device)
 
@@ -156,7 +153,7 @@ def batch_process_piece(
                 print(f"  ✗ Missing latent vector path for {image_name}, skipping.")
                 continue
 
-            k = apply_piece_to_image(
+            k,probs = apply_piece_to_image(
                 gan_model_path=gan_path,
                 latent_vector_path=latent_vector_path,
                 classifier=classifier,
@@ -169,9 +166,9 @@ def batch_process_piece(
                 device=device
             )
 
-            #log.write(f"{image_name}: {k} features changed\n")
+            log.write(f"The class probabilities for the reconstructed {image_name} are:{probs} -> {k} features changed\n")
 
-    print("\n✅ All done. Results in:", output_dir)
+    print("\n✅ All done. Counterfactual feature vectors saved in:", output_dir)
 
 
 if __name__ == "__main__":

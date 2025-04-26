@@ -9,7 +9,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
-
+from cnn_models import load_cnn_model
 from PIL import Image
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 
@@ -19,11 +19,8 @@ sys.path.append("/home/ubuntu/PTI")  # adjust or remove
 from utils import (
     convert_tensor_to_png,
     latent_vector_optimization,
-    preprocess_for_classifier,
-    plot_orig_and_cf
+    preprocess_for_classifier
 )
-from cnn_models import load_cnn_model
-
 
 def save_config(args: argparse.Namespace, output_dir: str) -> None:
     """Save command-line arguments to a config.txt in output_dir."""

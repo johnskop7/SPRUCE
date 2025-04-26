@@ -4,7 +4,7 @@ gan:
   checkpoints_dir: "/home/ubuntu/checkpoints/cardiomegaly"
   embeddings_dir: "/home/ubuntu/embeddings_big/cardiomegaly/PTI"
   original_images_dir: "/home/ubuntu/test_images_cardiomegaly"
-  output_dir: "/home/ubuntu/experiment_2"
+  output_dir: "/home/ubuntu/experiment_3"
 
 # CNN model settings
 cnn:
