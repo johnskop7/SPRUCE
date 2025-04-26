@@ -111,7 +111,7 @@ def latent_vector_optimization(
         if epoch % 2 == 0:
             print(
                 f"[Epoch {epoch}/{epochs}] Loss={loss.item():.4f} | "
-                f"Piece={piece_loss.item():.4f} | LPIPS={lpips_loss.item():.4f} | "
+                f"Piece={piece_loss.item():.4f} | LPIPS={lpips_loss.item():.4f} | Latent_reg ={latent_reg.item():.4f} |"
                 f"L1={l1_norm_normalized.item():.4f}"
             )
 
