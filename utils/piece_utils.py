@@ -1,5 +1,5 @@
 # piece.py
-
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import pickle
@@ -264,28 +264,35 @@ class GMMConvNeXt:
 ###############################################################################
 #               PRECOMPUTE GMMs FOR A GIVEN CLASS
 ###############################################################################
-def precompute_gmms_for_class(dist_data, class_idx, model_type='convnext', n_components=2, alpha=0.05):
+def precompute_gmms_for_class(dist_data,
+                              class_idx,
+                              classifier_type='convnext',
+                              n_components=2,
+                              alpha=0.05):
     """
     For the given class 'class_idx', fit ONE GMM per feature, so we don't have
     to re-fit for every query image. Returns a list of model objects (one per feature).
-
-    dist_data: pickled data structure of shape [n_classes],
-               dist_data[class_idx].shape = [N_samples, N_features].
-    class_idx: integer class ID
-    model_type: 'resnet50' or 'convnext' (changes the GMM class used)
-    n_components: how many mixture components to fit
-    alpha: default p_value to store in GMM objects
     """
     data_for_class = dist_data[class_idx]  # shape: [N_samples, N_features]
+    num_features   = data_for_class.shape[1]
+
     gmms = []
-    for fidx in range(data_for_class.shape[1]):
+    # wrap the range in tqdm
+    for fidx in tqdm(range(num_features),
+                     desc="Precomputing GMMs",
+                     unit="feature"):
         column = data_for_class[:, fidx]
 
-        # Pick the correct GMM class
-        if model_type == 'resnet50':
-            gmm_obj = GMMResNet50(column, value=0.0, p_value=alpha, n_components=n_components)
+        if classifier_type == 'resnet50':
+            gmm_obj = GMMResNet50(column,
+                                  value=0.0,
+                                  p_value=alpha,
+                                  n_components=n_components)
         else:
-            gmm_obj = GMMConvNeXt(column, value=0.0, p_value=alpha, n_components=n_components)
+            gmm_obj = GMMConvNeXt(column,
+                                  value=0.0,
+                                  p_value=alpha,
+                                  n_components=n_components)
 
         gmms.append(gmm_obj)
     return gmms
@@ -296,11 +303,11 @@ def precompute_gmms_for_class(dist_data, class_idx, model_type='convnext', n_com
 ###############################################################################
 def acquire_feature_probabilities(
         target_class,
-        cnn,
+        classifier,
         original_query_img=None,
         alpha=0.05,
         precomputed_gmms=None,  # pass in the GMMs we already fit
-        model_type='resnet50'
+        classifier_type='resnet50'
 ):
     """
     Acquire feature probabilities for a specific class & query image,
@@ -309,24 +316,24 @@ def acquire_feature_probabilities(
     Returns a DataFrame of shape [n_features, ...].
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    cnn.to(device)
-    cnn.eval()
+    classifier.to(device)
+    classifier.eval()
 
     if original_query_img is not None:
         original_query_img = original_query_img.to(device)
 
     # Forward pass -> feature vector
     with torch.no_grad():
-        logits, features = cnn(original_query_img, return_features=True)
+        logits, features = classifier(original_query_img, return_features=True)
         query_features = features[0].detach().cpu().numpy()  # shape [n_features,]
 
     # Class-specific final-layer weights (for sign checks, etc.)
-    if model_type == 'resnet50':
-        digit_weights = cnn.model.fc.weight.detach().cpu().numpy()[target_class]
-    elif model_type == 'convnext':
-        digit_weights = cnn.convnext.classifier[2].weight.detach().cpu().numpy()[target_class]
+    if classifier_type == 'resnet50':
+        digit_weights = classifier.model.fc.weight.detach().cpu().numpy()[target_class]
+    elif classifier_type == 'convnext':
+        digit_weights = classifier.convnext.classifier[2].weight.detach().cpu().numpy()[target_class]
     else:
-        raise ValueError(f"Unknown model_type: {model_type}")
+        raise ValueError(f"Unknown classifier_type: {classifier_type}")
 
     fail_results, succeed_results = [], []
     high_results, low_results = [], []
@@ -336,7 +343,7 @@ def acquire_feature_probabilities(
     # We assume precomputed_gmms is a list of length == num features
     n_features = len(query_features)
 
-    for i in tqdm(range(n_features), desc="Processing Features"):
+    for i in range(n_features):
         feature_value = float(query_features[i])
 
         # Grab the GMM we fit once for this feature
@@ -374,7 +381,7 @@ def acquire_feature_probabilities(
 ###############################################################################
 #             FILTER DF OF EXCEPTIONAL NOISE (SAME LOGIC)
 ###############################################################################
-def filter_df_of_exceptional_noise(df, target_class, cnn, alpha=0.05, model_type='resnet50'):
+def filter_df_of_exceptional_noise(df, target_class, classifier, alpha=0.05, classifier_type='resnet50'):
     """
     Filter the dataframe for features deemed 'exceptional,'
     referencing the sign of final-layer weights and significance checks.
@@ -384,12 +391,12 @@ def filter_df_of_exceptional_noise(df, target_class, cnn, alpha=0.05, model_type
     df['flag'] = np.zeros(df.shape[0])
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    if model_type == 'resnet50':
-        digit_weights = cnn.model.fc.weight.detach().cpu().numpy()[target_class]
-    elif model_type == 'convnext':
-        digit_weights = cnn.convnext.classifier[2].weight.detach().cpu().numpy()[target_class]
+    if classifier_type == 'resnet50':
+        digit_weights = classifier.model.fc.weight.detach().cpu().numpy()[target_class]
+    elif classifier_type == 'convnext':
+        digit_weights = classifier.convnext.classifier[2].weight.detach().cpu().numpy()[target_class]
     else:
-        raise ValueError(f"Unknown model_type: {model_type}")
+        raise ValueError(f"Unknown classifier_type: {classifier_type}")
 
     for idx, row in df.iterrows():
         feature_idx = int(row['Feature Map'])
@@ -398,7 +405,7 @@ def filter_df_of_exceptional_noise(df, target_class, cnn, alpha=0.05, model_type
         bern_fail = row['Bern Fail']
 
         # Original logic for resnet, else convnext
-        if model_type == 'resnet50':
+        if classifier_type == 'resnet50':
             if bern_fail and digit_weights[feature_idx] < 0:
                 df.loc[idx, 'flag'] = 1
             if cont_high and digit_weights[feature_idx] > 0:
@@ -434,3 +441,47 @@ def modifying_exceptional_features(df, target_class, query_activations):
             ideal_xp[feature_idx] = expected_value
 
     return ideal_xp
+
+
+def plot_tensor_image(tensor):
+    tensor = tensor.detach().cpu().squeeze()
+    img = tensor.permute(1, 2, 0).numpy()
+    img = np.clip(img, 0, 1)
+
+    # Plot the image
+    plt.imshow(img)
+    plt.axis('off')
+    plt.show()
+
+def preprocess_for_classifier(image_tensor):
+    mean = torch.tensor([0.485, 0.456, 0.406], device=image_tensor.device).view(1, 3, 1, 1)
+    std = torch.tensor([0.229, 0.224, 0.225], device=image_tensor.device).view(1, 3, 1, 1)
+    image_normalized = (image_tensor - mean) / std
+
+    return image_normalized
+
+def compute_class_probabilities(image, model, device):
+    # Check if the tensor is 3D and convert to 4D if needed
+    if image.dim() == 3:
+        image = image.unsqueeze(0)
+
+    image = image.to(device)
+    logits,features = model(image)
+    probs = torch.softmax(logits, dim=1)
+    _, predicted_labels = torch.max(probs, dim=1)
+    return probs
+
+def load_reconstructed_image(w_pivot,classifier,device,gan, normalized = False):
+  #load the computed latent vector of the image and convert it to tensor
+  #Generate the image and normalize it
+  synthetic_image_initial = gan.synthesis(w_pivot,noise_mode = 'const',force_fp32=True)
+  synthetic_image_initial = (synthetic_image_initial * 0.5 + 0.5).clamp(0, 1) #normalize the image from [-1,1] to [0,1]
+
+  if normalized :
+    # Preprocess the synthetic image for the classifier
+    synthetic_image_initial = preprocess_for_classifier(synthetic_image_initial)
+    synthetic_image_initial = synthetic_image_initial.to(device)
+
+  probs = compute_class_probabilities(synthetic_image_initial,classifier,device)
+  #print('The class probabilities of the GAN approximated image are:',probs[0].detach().cpu().numpy())
+  return synthetic_image_initial

@@ -2,7 +2,7 @@
 gan:
   original_weights: "/home/ubuntu/gan_chest_xrays.pkl"
   checkpoints_dir: "/home/ubuntu/checkpoints/cardiomegaly"
-  embeddings_dir: "/home/ubuntu/embeddings_big/cardiomegaly"
+  embeddings_dir: "/home/ubuntu/embeddings_big/cardiomegaly/PTI"
   original_images_dir: "/home/ubuntu/test_images_cardiomegaly"
   output_dir: "/home/ubuntu/experiment_2"
 

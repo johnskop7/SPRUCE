@@ -95,7 +95,7 @@ def process_all_generators(checkpoints_dir, embeddings_dir, old_generator_path,
 
         image_name              = "_".join(parts[2:])[:-3]  # strip ".pt"
         new_generator_path      = os.path.join(checkpoints_dir, generator_file)
-        latent_vector_path      = os.path.join(embeddings_dir, "PTI",image_name, "0.pt")
+        latent_vector_path      = os.path.join(embeddings_dir,image_name, "0.pt")
         original_image_path     = os.path.join(original_images_dir, f"{image_name}.png")
         inverted_image_output   = os.path.join(inverted_images_output_dir, f"{image_name}.png")
 
