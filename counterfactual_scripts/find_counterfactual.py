@@ -10,6 +10,9 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 from utils.model_utils import load_classifier_model
 from PIL import Image
+from tqdm import tqdm
+import logging
+import shutil
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 from utils.io_utils import (
     convert_tensor_to_png,
@@ -27,14 +30,37 @@ warnings.filterwarnings("ignore", module="lpips.lpips")
 
 
 
-def save_config(args: argparse.Namespace, output_dir: str) -> None:
-    """Save command-line arguments to a config.txt in output_dir."""
+def setup_logging(output_dir: str) -> logging.Logger:
+    """Configure logging to console + file."""
     os.makedirs(output_dir, exist_ok=True)
-    config_path = os.path.join(output_dir, "config.txt")
-    with open(config_path, "w") as f:
-        for k, v in vars(args).items():
-            f.write(f"{k}: {v}\n")
-    print(f"Configuration saved to {config_path}")
+    log_path = os.path.join(output_dir, "run.log")
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+
+    # formatter
+    fmt = logging.Formatter("%(asctime)s %(levelname)-8s %(message)s",
+                            datefmt="%Y-%m-%d %H:%M:%S")
+
+    # console handler
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.INFO)
+    ch.setFormatter(fmt)
+    logger.addHandler(ch)
+
+    # file handler
+    fh = logging.FileHandler(log_path)
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(fmt)
+    logger.addHandler(fh)
+
+    logger.info(f"Logging to console and {log_path}")
+    return logger
+
+def save_full_config(config_path: str, output_dir: str, logger: logging.Logger) -> None:
+    """Copy the YAML config into the experiment directory for record."""
+    target = os.path.join(output_dir, "config.yaml")
+    shutil.copyfile(config_path, target)
+    logger.info(f"Copied full YAML config to {target}")
 
 
 def process_counterfactual(
@@ -57,7 +83,7 @@ def process_counterfactual(
     """Compute and save a single counterfactual image & metrics."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     image_name = os.path.basename(input_path).replace("_cf_feature_vector.pickle", "")
-    print(f"\n▶ Processing {image_name}")
+    logger.info(f"\n▶ Processing {image_name}")
 
     # -- load classifier --
     classifier = load_classifier_model(classifier_type=classifier_type,
@@ -73,13 +99,13 @@ def process_counterfactual(
     # -- load original image --
     orig_path = os.path.join(original_images_dir, f"{image_name}.png")
     if not os.path.exists(orig_path):
-        print(f"Missing original image, skipping {image_name}")
+        logger.warning(f"Missing original image, skipping {image_name}")
         return
     orig_np = np.array(Image.open(orig_path).convert("RGB"))
 
     # -- load GAN generator --
     if not os.path.exists(generator_path):
-        print(f"Missing generator, skipping {image_name}")
+        logger.warning(f"Missing generator, skipping {image_name}")
         return
     gan = torch.load(generator_path, map_location=device,weights_only=False).to(device)
 
@@ -162,7 +188,7 @@ def process_counterfactual(
     plt.tight_layout()
     plt.savefig(comp_path)
     plt.close()
-    print(f"  ✓ Saved comparison to {comp_path}")
+    logger.info(f"  ✓ Saved comparison to {comp_path}")
 
     # -- save CF image alone --
     cf_dir = os.path.join(output_dir, "counterfactuals")
@@ -170,7 +196,7 @@ def process_counterfactual(
     cf_path = os.path.join(cf_dir, f"{image_name}_cf.png")
     convert_tensor_to_png(x_cf.squeeze(0).cpu(), filename=cf_path,
                           normalized=False, image_size=image_size)
-    print(f"  ✓ Saved CF image to {cf_path}")
+    logger.info(f"  ✓ Saved CF image to {cf_path}")
 
 
 def batch_process_counterfactuals(
@@ -192,19 +218,19 @@ def batch_process_counterfactuals(
 ) -> None:
     """Run `process_counterfactual` on every fine-tuned GAN in `checkpoints_dir`."""
     os.makedirs(output_dir, exist_ok=True)
-    for fname in os.listdir(checkpoints_dir):
+    for fname in tqdm(os.listdir(checkpoints_dir),desc="Computing Counterfactuals"):
         if not fname.endswith(".pt"):
             continue
         parts = fname.split("_")
         if len(parts) < 3:
-            print(f"Skipping invalid {fname}")
+            logger.warning(f"Skipping invalid {fname}")
             continue
 
         name = "_".join(parts[2:])[:-3]
         gan_path = os.path.join(checkpoints_dir, fname)
         cf_pickle = os.path.join(input_dir, f"{name}_cf_feature_vector.pickle")
         if not os.path.exists(cf_pickle):
-            print(f"No CF vector for {name}, skipping")
+            logger.warning(f"No CF vector for {name}, skipping")
             continue
 
         process_counterfactual(
@@ -225,7 +251,7 @@ def batch_process_counterfactuals(
             lambda_image        = lambda_image
         )
 
-    print("\n✅ All counterfactuals generated.")
+    logger.info("\n✅ All counterfactuals generated.")
 
 
 if __name__ == "__main__":
@@ -238,18 +264,25 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    # 1) load YAML
+    # load YAML
     with open(args.config, "r") as f:
         cfg = yaml.safe_load(f)
 
-    # 2) unpack
-    gan_cfg = cfg["gan"]
+    # unpack
+    gan_cfg        = cfg["gan"]
     classifier_cfg = cfg["classifier"]
-    opt_cfg = cfg["opt"]
+    opt_cfg        = cfg["opt"]
 
-    # 3) derive input_dir from piece output
+    # set up logging into the GAN output_dir
+    logger = setup_logging(gan_cfg["output_dir"])
+
+    # save the full YAML
+    save_full_config(args.config, gan_cfg["output_dir"], logger)
+
+    # derive input_dir from piece output
     input_dir = os.path.join(gan_cfg["output_dir"], "feature_vectors")
 
+    logger.info("Starting batch_process_counterfactuals")
     batch_process_counterfactuals(
         checkpoints_dir      = gan_cfg["checkpoints_dir"],
         input_dir            = input_dir,

@@ -7,6 +7,7 @@ import numpy as np
 from PIL import Image
 import torchvision.transforms as transforms
 from tqdm import tqdm
+import logging
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
@@ -108,11 +109,16 @@ def latent_vector_optimization(
             probs = torch.softmax(logits, dim=1).cpu()
             images_for_gif.append((image_preproc.squeeze(0).cpu(), probs))
 
-        if epoch % 2 == 0:
-            print(
-                f"[Epoch {epoch}/{epochs}] Loss={loss.item():.4f} | "
-                f"Piece={piece_loss.item():.4f} | LPIPS={lpips_loss.item():.4f} | Latent_reg ={latent_reg.item():.4f} |"
-                f"L1={l1_norm_normalized.item():.4f}"
+        if epoch % 10 == 0:
+          # grab the root logger (which your main script already wired up)
+                logger = logging.getLogger()
+                logger.info(
+        f"[Epoch {epoch}/{epochs}] "
+         f"Loss={loss.item():.4f} | "
+         f"Piece={piece_loss.item():.4f} | "
+         f"LPIPS={lpips_loss.item():.4f} | "
+         f"Latent_reg={latent_reg.item():.4f} | "
+         f"L1={l1_norm_normalized.item():.4f}"
             )
 
     return w_e.detach(), images_for_gif
