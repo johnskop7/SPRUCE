@@ -21,7 +21,7 @@ from utils.io_utils import (
     tensor_to_numpy
 )
 from utils.optim_utils import latent_vector_optimization
-import torch_utils
+import PTI.torch_utils
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 os.environ['TORCH_CUDA_ARCH_LIST'] = "8.6" #just to suppress a warning

@@ -3,6 +3,7 @@
 import torch
 import torch.nn as nn
 from torchvision import models
+import pickle
 from models.ConvNeXt import CustomConvNeXt
 from models.ResNet50 import CustomResNet50
 
