@@ -5,7 +5,6 @@ import logging
 import torch
 import torch.nn as nn
 import sys
-# your other imports…
 from load_dataloaders import load_data
 from train_functions import setup_logger, train_model, evaluate_model
 sys.path.append('/home/ubuntu/SPRUCE')
@@ -16,11 +15,8 @@ from models.ResNet50 import CustomResNet50
 def get_args():
     parser = argparse.ArgumentParser(description="Train CNN classifier on medical images")
 
-    # 1) a single “config” flag:
     parser.add_argument("--config", type=str,
                         help="Path to a YAML config file")
-
-    # 2) all of your existing flags:
     parser.add_argument("--dataset_type", type=str, required=False,
                         help="Type of dataset (cardiomegaly, lung_opacity, oct, dementia)")
     parser.add_argument("--data_dir", type=str, help="Image directory")
@@ -48,18 +44,14 @@ def get_args():
     parser.add_argument("--pgd_steps", type=int, default=10)
     parser.add_argument("--norm", type=str, choices=['l2','l_inf'], default='l_inf')
 
-    # 3) First pass: only pick up --config
     partial_args, _ = parser.parse_known_args()
     if partial_args.config:
         with open(partial_args.config, 'r') as f:
             cfg = yaml.safe_load(f)
-        # inject all keys from the YAML into argparse defaults
         parser.set_defaults(**cfg)
 
-    # 4) Final parse: now CLI flags override YAML, and YAML fills in anything missing.
     args = parser.parse_args()
 
-    # optional sanity-check for class_weights
     if args.class_weights is not None and len(args.class_weights) != args.num_classes:
         parser.error(f"--class_weights expects {args.num_classes} values, but {len(args.class_weights)} were given.")
     return args

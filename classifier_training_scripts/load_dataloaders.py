@@ -67,18 +67,10 @@ def load_data(data_dir, batch_size, image_size, normalized=True, dataset_type='o
         mapping = {'Cardiomegaly': 0, 'Normal': 1}
     elif dataset_type == 'lung_opacity':
         mapping = {'Lung_Opacity': 0, 'Normal': 1}
-    # elif dataset_type == 'nodule':
-    #     mapping = {'Nodule': 0, 'Normal': 1}
-    # elif dataset_type == "mass":
-    #     mapping = {'Mass': 0, 'Normal': 1}
     elif dataset_type == 'oct':
         mapping = {'CNV': 0, 'DME': 1, 'DRUSEN': 2, 'NORMAL': 3}
     elif dataset_type == 'dementia':
         mapping = {'Mild Impairment': 0, 'Moderate Impairment':1,'No Impairment': 2, 'Very Mild Impairment':3}
-    # elif dataset_type == 'diabetic_retinopathy':
-    #     mapping = {  "Healthy" : 0, "Unhealthy" : 1 }
-    # elif dataset_type == 'brain_tumor':
-    #     mapping = {'glioma': 0, 'meningioma': 1 , 'notumor': 2 , 'pituitary' : 3}
     if mapping is not None:
         for split in image_datasets:
             current_classes = set(image_datasets[split].classes)
