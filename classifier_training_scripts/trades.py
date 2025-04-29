@@ -45,8 +45,8 @@ def trades_loss(model,
         for _ in range(perturb_steps):
             x_adv.requires_grad_()
             with torch.enable_grad():
-                logits_adv = model(x_adv)
-                logits_nat = model(x_natural)
+                logits_adv,_ = model(x_adv)
+                logits_nat,_ = model(x_natural)
                 loss_kl = criterion_kl(F.log_softmax(logits_adv, dim=1),
                                        F.softmax(logits_nat, dim=1))
             grad = torch.autograd.grad(loss_kl, [x_adv])[0]
@@ -65,8 +65,8 @@ def trades_loss(model,
 
             # Optimize delta to maximize the KL divergence
             optimizer_delta.zero_grad()
-            logits_adv = model(adv)
-            logits_nat = model(x_natural)
+            logits_adv,_ = model(adv)
+            logits_nat,_ = model(x_natural)
             loss = -criterion_kl(F.log_softmax(logits_adv, dim=1),
                                  F.softmax(logits_nat, dim=1))
             loss.backward()
@@ -87,9 +87,9 @@ def trades_loss(model,
     model.train()
 
     # Compute the TRADES loss
-    logits = model(x_natural)
+    logits,_ = model(x_natural)
     loss_natural = F.cross_entropy(logits, y)
-    logits_adv = model(x_adv)
+    logits_adv,_ = model(x_adv)
     loss_robust = criterion_kl(F.log_softmax(logits_adv, dim=1),
                                F.softmax(logits, dim=1))
     loss = loss_natural + beta * loss_robust

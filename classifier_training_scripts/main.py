@@ -1,14 +1,73 @@
-import torch
-import torch.nn as nn
-from load_dataloaders import load_data
-from models.ConvNeXt import CustomConvNeXt
-from models.ResNet50 import CustomResNet50
-from train_functions import setup_logger, train_model, evaluate_model, validate_clean
 import argparse
+import yaml
 import os
 import logging
+import torch
+import torch.nn as nn
+import sys
+# your other imports…
+from load_dataloaders import load_data
+from train_functions import setup_logger, train_model, evaluate_model
+sys.path.append('/home/ubuntu/SPRUCE')
+from models.ConvNeXt import CustomConvNeXt
+from models.ResNet50 import CustomResNet50
 
-def main(args):
+
+def get_args():
+    parser = argparse.ArgumentParser(description="Train CNN classifier on medical images")
+
+    # 1) a single “config” flag:
+    parser.add_argument("--config", type=str,
+                        help="Path to a YAML config file")
+
+    # 2) all of your existing flags:
+    parser.add_argument("--dataset_type", type=str, required=False,
+                        help="Type of dataset (cardiomegaly, lung_opacity, oct, dementia)")
+    parser.add_argument("--data_dir", type=str, help="Image directory")
+    parser.add_argument("--model_arch", type=str, choices=['convnext','resnet50'], default='convnext')
+    parser.add_argument("--num_classes", type=int, default=2)
+    parser.add_argument("--lr", type=float, default=0.1)
+    parser.add_argument("--epochs", type=int, default=100)
+    parser.add_argument("--weight_decay", type=float, default=5e-4)
+    parser.add_argument("--batch_size", type=int, default=64)
+    parser.add_argument("--image_size", type=int, default=256)
+    parser.add_argument('--class_weights', nargs='+', type=float, default=None)
+    parser.add_argument('--label_smoothing', type=float, default=0.1)
+    parser.add_argument("--patience", type=int, default=5)
+    parser.add_argument("--optimizer", type=str, choices=['sgd','adamw'], default='sgd')
+    parser.add_argument("--scheduler", type=str, choices=['step','cosine','reduce_on_plateau'], default='step')
+    parser.add_argument("--step_size", type=int, default=30)
+    parser.add_argument("--gamma", type=float, default=0.1)
+    parser.add_argument("--warmup_epochs", type=int, default=10)
+    parser.add_argument("--output_dir", type=str)
+    parser.add_argument("--method", type=str, choices=['plain','trades'], default='plain')
+    parser.add_argument("--adv_eval_freq", type=int, default=5)
+    parser.add_argument("--beta", type=float, default=1.0)
+    parser.add_argument("--epsilon", type=float, default=0.08)
+    parser.add_argument("--alpha", type=float, default=0.02)
+    parser.add_argument("--pgd_steps", type=int, default=10)
+    parser.add_argument("--norm", type=str, choices=['l2','l_inf'], default='l_inf')
+
+    # 3) First pass: only pick up --config
+    partial_args, _ = parser.parse_known_args()
+    if partial_args.config:
+        with open(partial_args.config, 'r') as f:
+            cfg = yaml.safe_load(f)
+        # inject all keys from the YAML into argparse defaults
+        parser.set_defaults(**cfg)
+
+    # 4) Final parse: now CLI flags override YAML, and YAML fills in anything missing.
+    args = parser.parse_args()
+
+    # optional sanity-check for class_weights
+    if args.class_weights is not None and len(args.class_weights) != args.num_classes:
+        parser.error(f"--class_weights expects {args.num_classes} values, but {len(args.class_weights)} were given.")
+    return args
+
+
+
+def main():
+    args = get_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if args.output_dir is not None:
         os.makedirs(args.output_dir, exist_ok=True)
@@ -140,58 +199,4 @@ def main(args):
     logging.info(f"F1 Score: {f1}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Train CNN classifier on medical images")
-
-    # Dataset parameters
-    parser.add_argument("--dataset_type", type=str, required=True,
-                        help="Type of dataset (cardiomegaly, lung_opacity, oct, dementia)")
-    parser.add_argument("--data_dir", type=str, required=True, help="Image directory")
-
-    # Model parameters
-    parser.add_argument("--model_arch", type=str, choices=['convnext', 'resnet50'], default='convnext',
-                        help="Model architecture to use: 'convnext' or 'resnet50'")
-    parser.add_argument("--num_classes", type=int, default=2, help="Number of classes of the dataset")
-
-    # Training hyperparameters
-    parser.add_argument("--lr", type=float, default=0.1, help="Initial learning rate for the classifier training")
-    parser.add_argument("--epochs", type=int, default=100, help="Number of epochs for the classifier training")
-    parser.add_argument("--weight_decay", type=float, default=5e-4, help="Weight decay during training")
-    parser.add_argument("--batch_size", type=int, default=64, help="Batch size for training")
-    parser.add_argument("--image_size", type=int, default=256, help="Input image size")
-    parser.add_argument('--class_weights', nargs='+', type=float, default=None,help="Manual class weights for unbalanced datasets. Must match --num_classes.")
-
-    parser.add_argument('--label_smoothing', type=float, default=0.1,help = "Label smoothing parameter")
-    # Early stopping
-    parser.add_argument("--patience", type=int, default=5,
-                        help="Number of epochs to wait before ending the training if the val loss does not improve")
-
-    # Optimizer and scheduler
-    parser.add_argument("--optimizer", type=str, choices=['sgd', 'adamw'], default='sgd',
-                        help="Optimizer to use: 'sgd' or 'adam'")
-    parser.add_argument("--scheduler", type=str, choices=['step', 'cosine', 'reduce_on_plateau'], default='step',
-                        help="Learning rate scheduler to use")
-    parser.add_argument("--step_size", type=int, default=30, help="Step size for StepLR scheduler")
-    parser.add_argument("--gamma", type=float, default=0.1, help="Gamma for StepLR scheduler")
-    parser.add_argument("--warmup_epochs", type=int, default=10,
-                        help="Number of warmup epochs for learning rate ramp-up")
-    # Output directory
-    parser.add_argument("--output_dir", type=str, help="Output directory to save the training info")
-
-    # Training method
-    parser.add_argument("--method", type=str, choices=['plain', 'trades'], default='plain',
-                        help="Select training method: 'plain' or 'trades'")
-
-    # TRADES-specific hyperparameters
-    parser.add_argument("--adv_eval_freq", type=int,default=5, help="Adversarial evaluation frequency")
-    parser.add_argument("--beta", type=float, default=1.0, help="Trade-off parameter for TRADES")
-    parser.add_argument("--epsilon", type=float, default=0.08, help="Maximum perturbation for TRADES")
-    parser.add_argument("--alpha", type=float, default=0.02, help="Step size for PGD in TRADES")
-    parser.add_argument("--pgd_steps", type=int, default=10, help="Number of PGD steps for TRADES")
-    parser.add_argument("--norm", type=str, choices=['l2', 'l_inf'], default='l_inf',
-                        help="Norm to use for adversarial training (l2 or l_inf)")
-
-    args = parser.parse_args()
-    if args.class_weights is not None and len(args.class_weights) != args.num_classes:
-        parser.error(f"--class_weights expects {args.num_classes} values, but {len(args.class_weights)} were given.")
-
-    main(args)
+    main()

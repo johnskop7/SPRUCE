@@ -71,7 +71,7 @@ def train_one_epoch(model, train_loader, criterion, optimizer, device, use_trade
                     distance=trades_args.norm
                 )
             else:
-                outputs = model(images)
+                outputs ,features = model(images)
                 loss = criterion(outputs, labels)
 
         scaler.scale(loss).backward()
@@ -96,7 +96,7 @@ def validate_clean(model, validation_loader, device):
         for images, labels in tqdm(validation_loader, desc='Val (Clean)', leave=False):
             images, labels = images.to(device), labels.to(device)
             with autocast():
-                outputs = model(images)
+                outputs,features = model(images)
                 loss = criterion(outputs, labels)
 
             _, predicted = torch.max(outputs, 1)
@@ -129,7 +129,7 @@ def validate_adversarial(model, validation_loader, device, trades_args):
         # PGD Attack
         for _ in range(pgd_steps):
             x_adv.requires_grad_()
-            logits_adv = model(x_adv)
+            logits_adv,features = model(x_adv)
             loss_ce = criterion(logits_adv, labels)
             grad_x_adv = torch.autograd.grad(loss_ce, [x_adv])[0]
 
@@ -149,7 +149,7 @@ def validate_adversarial(model, validation_loader, device, trades_args):
 
         # Evaluate adversarial images
         with torch.no_grad():
-            outputs_adv = model(x_adv)
+            outputs_adv,features = model(x_adv)
             loss_adv = criterion(outputs_adv, labels)
 
         _, predicted = torch.max(outputs_adv, 1)
@@ -326,7 +326,7 @@ def evaluate_model(test_loader, model, device, dataset=None, output_dir=None):
     with torch.no_grad():
         for inputs, labels in tqdm(test_loader, desc="Evaluating"):
             inputs, labels = inputs.to(device), labels.to(device)
-            outputs = model(inputs)
+            outputs,features = model(inputs)
             _, predicted = torch.max(outputs, 1)
             predictions.extend(predicted.view(-1).tolist())
             actuals.extend(labels.view(-1).tolist())

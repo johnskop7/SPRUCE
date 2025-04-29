@@ -1,0 +1,29 @@
+dataset_type: cardiomegaly
+data_dir: /home/ubuntu/chexpert_cardiomegaly_normal
+model_arch: convnext
+num_classes: 2
+
+lr: 5e-4
+epochs: 100
+weight_decay: 1e-2
+batch_size: 16
+image_size: 256
+
+class_weights: [1.0, 1.0]
+label_smoothing: 0.01
+patience: 10
+
+optimizer: adamw
+scheduler: cosine
+warmup_epochs: 5
+
+output_dir: /home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_cardiomegaly_exp1
+method: trades
+
+adv_eval_freq: 5
+beta: 6
+epsilon: 0.063
+alpha: 0.0063
+pgd_steps: 10
+norm: l_inf
+
