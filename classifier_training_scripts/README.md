@@ -1,30 +1,36 @@
 # Classifier Training Scripts
 
-A collection of scripts and configurations for training a CNN classifier on medical images, extracting penultimate-layer activations, and saving correctly classified test images.
+This folder contains three main scripts: train.py , save_activations.py and save_images.py . Each script has its own configuration file for passing the necessary arguments. We are going to explain the functioning of each script below.
 
 ---
 
-## Repository Layout
+## Layout
 
 ```
 classifier_training_scripts/
 ├── configs/
 │   ├── train.yaml             # training hyperparameters & data/model paths
-│   ├── activations.yaml       # settings for dumping penultimate-layer features
+│   ├── activations.yaml       # settings for saving penultimate-layer featureactivations
 │   └── correct_images.yaml    # settings for saving correctly classified test images
 ├── scripts/
 │   ├── train.py               # runs adversarial/plain training
-│   ├── save_activations.py    # extracts & pickles penultimate-layer activations
+│   ├── save_activations.py    # extracts & saves penultimate-layer activations
 │   └── save_images.py         # saves correctly classified images above threshold
 ├── data/
-│   └── loaders.py             # `load_data` for train/val/test splits
+│   ├── loaders.py             # builds and returns data_loaders for each train/test/val split
+│   ├── transforms.py          # transforms applied on images during training 
+├── losses/
+│   ├── trades.py              # implementation of TRADES loss based on https://github.com/yaodongyu/TRADES
 ├── models/
 │   ├── convnext.py            # ConvNeXt wrapper
 │   └── resnet50.py            # ResNet50 wrapper
 ├── training/
-│   ├── trainer.py             # `Trainer` class with LR scheduling, TRADES, callbacks
+│   ├── trainer.py             # encapsulates the full train–validate–save loop in one class called Trainer
 │   ├── callbacks.py           # `EarlyStopping` & `ModelCheckpoint`
 │   └── metrics.py             # classification metrics helpers
+├── utils/
+│   ├── config.py              # Simple YAML loader that reads a `.yaml` file into a Python `dict`
+│   └── logging.py             # Centralized logger setup
 └── README.md                  # this file
 ```
 
@@ -35,7 +41,7 @@ classifier_training_scripts/
 * Python ≥ 3.8
 * PyTorch & torchvision
 * pyyaml, tqdm, numpy, Pillow
-* (Optional) CUDA for GPU acceleration
+  * CUDA for GPU acceleration
 
 Install dependencies:
 
@@ -122,11 +128,44 @@ extract:
   num_images:   100
 ```
 
+## Dataset Folder Structure
+
+Your data directory should follow the standard `ImageFolder` layout:
+
+```
+
+/path/to/dataset/
+├── train/
+│   ├── classA/
+│   │   ├── img001.png
+│   │   └── …
+│   └── classB/
+│       ├── img002.png
+│       └── …
+├── val/
+│   ├── classA/
+│   │   ├── img101.png
+│   │   └── …
+│   └── classB/
+│       ├── img102.png
+│       └── …
+└── test/
+├── classA/
+│   ├── img201.png
+│   └── …
+└── classB/
+├── img202.png
+└── …
+
+```
+Each of the `train/`, `val/`, and `test/` folders must contain one sub-folder per class, with all images for that class inside. This structure ensures compatibility with the provided data loaders.
+
 ---
 
 ## Script Usage
 
 All scripts live in `scripts/` and take a `-c`/`--config` argument.
+
 
 ### 1. Train the Model
 
@@ -134,12 +173,12 @@ All scripts live in `scripts/` and take a `-c`/`--config` argument.
 python scripts/train.py \
   --config configs/train.yaml
 ```
-
+* Trains the chosen model architecture on the specified dataset either adversarially or not.
 * Logs to console & `output_dir/training.log`
 * Saves:
 
   * `best_model.pth`
-  * `loss_curves.png` & `accuracy_curves.png`
+  * `loss_curves.png` & `accuracy_curve.png`
   * `confusion_matrix.png`
   * `metrics.json`
 
@@ -151,9 +190,10 @@ python scripts/save_activations.py \
 ```
 
 * Loads the **train** split
-* Extracts penultimate-layer features
-* Outputs a pickle:
+* Extracts penultimate-layer feature activations
+* Outputs a pickle dictionary:
   `{ class_id → ndarray[num_samples,feat_dim] }`
+* This file is necessary for the creation of counterfactual feature vectors based on the PIECE methodology
 
 ### 3. Save Correctly Classified Images
 
@@ -165,7 +205,7 @@ python scripts/save_images.py \
 * Loads the **test** split
 * Filters images where `pred == label` for `class_number`
 * Applies confidence ≥ `threshold`
-* Saves up to `num_images` PNGs in `output_dir`
+* Saves up to `num_images` images in `output_dir`
 
 ---
 
