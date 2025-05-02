@@ -1,0 +1,34 @@
+data:
+  data_dir: /home/ubuntu/chexpert_cardiomegaly_normal
+  batch_size: 16
+  image_size: 256
+  dataset_type: cardiomegaly
+
+optim:
+  lr: 5e-4
+  weight_decay: 1e-2
+  optimizer: adamw
+  scheduler: cosine
+  warmup_epochs: 5
+  step_size: 30
+  gamma: 0.1
+
+adv:
+  method: trades
+  beta: 6
+  epsilon: 0.063
+  alpha: 0.0063
+  pgd_steps: 10
+  norm: l_inf
+  adv_eval_freq: 1
+
+train:
+  epochs: 20
+  patience: 5
+  class_weights: [1.0, 1.0]
+  label_smoothing: 0.01
+
+model_arch: convnext
+num_classes: 2
+output_dir: /home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_cardiomegaly_exp16
+device: cuda

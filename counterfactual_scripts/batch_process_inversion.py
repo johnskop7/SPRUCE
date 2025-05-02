@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import argparse
 import warnings
 import sys
+from tqdm import tqdm
 import torch_utils
 from utils.model_utils import load_generators
 from utils.io_utils import compute_difference_image
@@ -20,7 +21,7 @@ def save_inverted_image(image, output_path):
     """Saves an image (numpy array) as a PNG file."""
     image_pil = Image.fromarray(image)
     image_pil.save(output_path)
-    print(f"Inverted image saved to {output_path}")
+    #print(f"Inverted image saved to {output_path}")
 
 
 def plot_counterfactual_grid(orig, before, after, diff_before, diff_after, save_path=None):
@@ -52,7 +53,7 @@ def plot_counterfactual_grid(orig, before, after, diff_before, diff_after, save_
     plt.tight_layout()
     if save_path:
         plt.savefig(save_path)
-        print(f"Saved comparison grid to {save_path}")
+        #print(f"Saved comparison grid to {save_path}")
     plt.show()
 
 
@@ -67,7 +68,7 @@ def process_all_generators(checkpoints_dir, embeddings_dir, old_generator_path,
 
     generator_files = [f for f in os.listdir(checkpoints_dir) if f.endswith(".pt")]
 
-    for generator_file in generator_files:
+    for generator_file in tqdm(generator_files,desc="Saving inverted images and differences",unit="gen"):
         parts = generator_file.split("_")
         if len(parts) < 3:
             print(f"Skipping invalid filename: {generator_file}")

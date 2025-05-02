@@ -9,14 +9,14 @@ gan:
 # classifier model settings
 classifier:
   type: "convnext"
-  weights: "/home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_cardiomegaly/best_model_weights.pth"
+  weights: "/home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_cardiomegaly_exp2/trained_model.pth"
   num_classes: 2
   normalized: true
 
 # PIECE settings
 piece:
   counterfactual_class: 1
-  class_activations: "/home/ubuntu/chexpert_experiment_2_class_activations.pkl"
+  class_activations: "/home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_cardiomegaly_exp2/class_activations.pkl"
   alpha: 0.05
   n_components: 5
 
@@ -25,7 +25,7 @@ opt:
   lr: 0.02
   epochs: 200
   lambda_piece: 1.0
-  lambda_perc: 0.1
+  lambda_perc: 0.005
   lambda_latent: 1e-4
-  lambda_image: 1e-6
+  lambda_image: 1e-7
   image_size: 256

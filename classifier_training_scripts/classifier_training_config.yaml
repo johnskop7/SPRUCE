@@ -1,21 +1,21 @@
 dataset_type: cardiomegaly
-data_dir: /home/ubuntu/chexpert_cardiomegaly_normal
-output_dir: /home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_cardiomegaly_exp1
+data_dir: /home/ubuntu/Normal_Cardiomegaly_dataset
+output_dir: /home/ubuntu/classifier_training_scripts/convnext_trades_cardiomegaly_augmented_exp1
 model_arch: convnext
 num_classes: 2
 
 #General Training configuration
-lr: 5e-4
-epochs: 100
-weight_decay: 1e-2
+lr: 5e-04
+epochs: 200
+weight_decay: 5e-02
 batch_size: 16
 image_size: 256
 class_weights: [1.0, 1.0]
-label_smoothing: 0.01
-patience: 10
+label_smoothing: 0.05
+patience: 20
 optimizer: adamw
 scheduler: cosine
-warmup_epochs: 5
+warmup_epochs: 10
 
 #Plain or adversarial training
 method: trades
@@ -23,8 +23,8 @@ method: trades
 #Adversarial training configuration
 adv_eval_freq: 5
 beta: 6
-epsilon: 0.063
-alpha: 0.0063
+epsilon: 0.03
+alpha: 0.003
 pgd_steps: 10
 norm: l_inf
 
