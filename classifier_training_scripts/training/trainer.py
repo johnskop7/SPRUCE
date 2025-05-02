@@ -192,40 +192,55 @@ class Trainer:
         return avg_loss, acc
 
     def _validate_adversarial(self) -> tuple:
+        """
+        Perform adversarial validation using PGD. Generates adversarial examples with gradients,
+        then evaluates model on them without gradients.
+        """
         self.model.eval()
         running_loss, correct, total = 0.0, 0, 0
         eps = self.cfg.adv.epsilon
         alpha = self.cfg.adv.alpha
         steps = self.cfg.adv.pgd_steps
         norm = self.cfg.adv.norm
-        with torch.no_grad():
-            for images, labels in tqdm(self.val_loader, desc='Adv Validating', leave=False):
-                images, labels = images.to(self.device), labels.to(self.device)
-                x_adv = images + torch.empty_like(images).uniform_(-eps, eps)
-                x_adv = x_adv.clamp(0, 1)
-                for _ in range(steps):
-                    x_adv.requires_grad_()
-                    logits_adv = self.model(x_adv)
-                    loss_inner = F.cross_entropy(logits_adv, labels)
-                    grad = torch.autograd.grad(loss_inner, x_adv)[0]
-                    if norm == 'l_inf':
-                        x_adv = x_adv.detach() + alpha * grad.sign()
-                        x_adv = torch.min(torch.max(x_adv, images - eps), images + eps)
-                    else:
-                        grad_flat = grad.view(grad.shape[0], -1)
-                        grad_norm = grad_flat.norm(p=2, dim=1).view(-1, 1, 1, 1)
-                        x_adv = x_adv.detach() + alpha * (grad / (grad_norm + 1e-8))
-                        delta = x_adv - images
-                        delta_norm = delta.view(delta.shape[0], -1).norm(p=2, dim=1).view(-1, 1, 1, 1)
-                        factor = torch.min(torch.ones_like(delta_norm), eps / (delta_norm + 1e-8))
-                        x_adv = images + delta * factor
-                    x_adv = x_adv.clamp(0, 1)
-                logits_adv, _ = self.model(x_adv)
+
+        for images, labels in tqdm(self.val_loader, desc='Adversarial Validating', leave=False):
+            images, labels = images.to(self.device), labels.to(self.device)
+            # Initialize adversarial examples
+            x_adv = images + torch.empty_like(images).uniform_(-eps, eps)
+            x_adv = x_adv.clamp(0, 1).detach()
+
+            # PGD attack loop (requires grad)
+            for _ in range(steps):
+                x_adv.requires_grad_(True)
+                # Forward
+                logits_adv = self.model(x_adv)
+                loss_inner = F.cross_entropy(logits_adv, labels)
+                # Backward for delta
+                grad = torch.autograd.grad(loss_inner, x_adv)[0]
+                # Update
+                if norm == 'l_inf':
+                    x_adv = x_adv.detach() + alpha * grad.sign()
+                    x_adv = torch.min(torch.max(x_adv, images - eps), images + eps)
+                else:
+                    # l2 norm
+                    grad_flat = grad.view(grad.size(0), -1)
+                    grad_norm = grad_flat.norm(p=2, dim=1).view(-1,1,1,1)
+                    x_adv = x_adv.detach() + alpha * (grad / (grad_norm + 1e-8))
+                    delta = x_adv - images
+                    delta_norm = delta.view(delta.size(0), -1).norm(p=2, dim=1).view(-1,1,1,1)
+                    factor = torch.min(torch.ones_like(delta_norm), eps / (delta_norm + 1e-8))
+                    x_adv = images + delta * factor
+                x_adv = x_adv.clamp(0, 1).detach()
+
+            # Final evaluation on adversarial examples
+            with torch.no_grad():
+                logits_adv = self.model(x_adv)
                 loss_final = F.cross_entropy(logits_adv, labels)
                 preds = torch.argmax(logits_adv, dim=1)
                 correct += (preds == labels).sum().item()
                 total += labels.size(0)
                 running_loss += loss_final.item() * labels.size(0)
+
         adv_loss = running_loss / len(self.val_loader.dataset)
         adv_acc = correct / total * 100
         return adv_loss, adv_acc
@@ -246,18 +261,18 @@ class Trainer:
 
         plt.figure(figsize=(8, 5))
         plt.plot(epochs, history['val_acc'], label='Validation Accuracy')
-        if any(a is not None for a in history['val_adv_acc']):
-            adv_epochs = [e for e in epochs if e % self.adv_eval_freq == 0]
-            adv_vals = [a for a in history['val_adv_acc'] if a is not None]
-            plt.plot(adv_epochs, adv_vals, label='Adversarial Accuracy')
+        # if any(a is not None for a in history['val_adv_acc']):
+        #     adv_epochs = [e for e in epochs if e % self.adv_eval_freq == 0]
+        #     adv_vals = [a for a in history['val_adv_acc'] if a is not None]
+        #     plt.plot(adv_epochs, adv_vals, label='Adversarial Accuracy')
         plt.xlabel('Epoch')
         plt.ylabel('Accuracy (%)')
         plt.legend()
-        plt.title('Accuracy Curves')
-        acc_path = os.path.join(self.cfg.output_dir, 'accuracy_curves.png')
+        plt.title('Accuracy Curve')
+        acc_path = os.path.join(self.cfg.output_dir, 'accuracy_curve.png')
         plt.savefig(acc_path, dpi=300, bbox_inches='tight')
         plt.close()
-        logging.info(f"Saved accuracy curves to {acc_path}")
+        logging.info(f"Saved accuracy curve to {acc_path}")
 
     def evaluate(self) -> dict:
         self.model.eval()
