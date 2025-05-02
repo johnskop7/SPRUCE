@@ -1,0 +1,14 @@
+# configs/activations.yaml
+data:
+  data_dir: "/home/ubuntu/Normal_Cardiomegaly_dataset"
+  batch_size: 64
+  image_size: 256
+  dataset_type: cardiomegaly
+
+model:
+  arch: convnext             # or resnet50
+  num_classes: 2
+  weights: "/home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_cardiomegaly_exp15/best_model.pth"
+
+extract:
+  save_path: "/home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_cardiomegaly_exp15/activations.pkl"
