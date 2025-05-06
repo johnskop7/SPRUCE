@@ -75,8 +75,9 @@ opt:
 
 ### 1. `batch_process_inversion.py`
 
-* **Purpose**: Invert each pivot latent through both the original and fine‐tuned (PTI) StyleGAN generators, then compare before/after reconstructions.
-* **Input**: GAN weights, pivot latents, original images (from `gan` section).
+* **Purpose**:Using the pivot latent vectors and the fine‐tuned (PTI) StyleGAN generators acquired from the gan inversion pipeline
+,we plot the final reconstructed image , the original one and their absolute differences so that we can assess the inversion qualitatively.
+* **Input**: Finetuned GAN weights, pivot latents, original images (from `gan` section).
 * **Output**:
 
   * Reconstructed images in `output_dir/inverted_images/`
@@ -84,17 +85,18 @@ opt:
 
 ### 2. `compute_ideal_xp.py`
 
-* **Purpose**: Compute “ideal” penultimate‐layer feature vectors via PIECE for a target class.
-* **Input**: Class‐conditional activations pickle, PIECE hyperparameters (from `piece` section).
+* **Purpose**: Compute “ideal” penultimate‐layer counterfactual feature vectors via PIECE for a target class.
+* **Input**: Class activations pickle, PIECE hyperparameters (from `piece` section).
 * **Output**:
 
-  * One `*_cf_feature_vector.pickle` per pivot in `output_dir/feature_vectors/`
-  * Summary `features_changed.txt`
+  * One `*_cf_feature_vector.pickle` per image in `output_dir/feature_vectors/`
+  * A file `features_changed.txt`, where we save the number of features changed for the construction of the counterfactual
+  feature vector , along with the probability vector of the classifier for the original image.
 
 ### 3. `find_counterfactual.py`
 
 * **Purpose**: Optimize StyleGAN latent codes to match PIECE feature vectors, yielding final counterfactual images.
-* **Input**: PIECE pickles, GAN & classifier settings (from `opt` & `gan` sections).
+* **Input**: PIECE counterfactual feature vectors, GAN & classifier settings (from `opt` & `gan` sections).
 * **Output**:
 
   * Optimized counterfactual images in `output_dir/counterfactuals/`
@@ -121,13 +123,13 @@ opt:
 
 ```bash
 # 1. Inversion & PTI comparison
-python scripts/batch_process_inversion.py --config configs/config.yaml
+python -m scripts/batch_process_inversion --config configs/config.yaml
 
 # 2. Compute PIECE feature vectors
-python scripts/compute_ideal_xp.py       --config configs/config.yaml
+python -m scripts/compute_ideal_xp       --config configs/config.yaml
 
 # 3. Generate final counterfactual images
-python scripts/find_counterfactual.py    --config configs/config.yaml
+python -m scripts/find_counterfactual    --config configs/config.yaml
 ```
 
 ---
