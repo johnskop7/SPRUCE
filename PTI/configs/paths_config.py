@@ -4,14 +4,14 @@ stylegan2_ada = '/home/ubuntu/results/00021-chexpert_images-paper256-resumecusto
 
 
 ## Dirs for output files
-checkpoints_dir = '/home/ubuntu/checkpoints/chexpert_cardiomegaly'
+checkpoints_dir = '/home/ubuntu/checkpoints/chexpert_pleural_effusion'
 embedding_base_dir = '/home/ubuntu/embeddings'
 
 ## Input info
 ### Input dir, where the images reside
-input_data_path = '/home/ubuntu/test_images_chexpert_cardiomegaly'
+input_data_path = '/home/ubuntu/test_images_chexpert_pleural_effusion'
 ### Inversion identifier, used to keeping track of the inversion results. Both the latent code and the generator
-input_data_id = 'chexpert_cardiomegaly'
+input_data_id = 'chexpert_pleural_effusion'
 
 ## Keywords
 pti_results_keyword = 'PTI'

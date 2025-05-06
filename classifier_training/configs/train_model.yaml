@@ -1,11 +1,11 @@
 data:
-  data_dir: /home/ubuntu/chexpert_cardiomegaly_normal
+  data_dir: /home/ubuntu/chexpert_pleural_effusion_normal
   batch_size: 16
   image_size: 256
-  dataset_type: cardiomegaly
+  dataset_type: pleural_effusion
 
 optim:
-  lr: 5e-4
+  lr: 1e-4
   weight_decay: 1e-2
   optimizer: adamw
   scheduler: cosine
@@ -16,19 +16,19 @@ optim:
 adv:
   method: trades
   beta: 6
-  epsilon: 0.063
-  alpha: 0.0063
+  epsilon: 0.016
+  alpha: 0.0016
   pgd_steps: 10
   norm: l_inf
-  adv_eval_freq: 1
+  adv_eval_freq: 5
 
 train:
-  epochs: 20
-  patience: 5
+  epochs: 100
+  patience: 10
   class_weights: [1.0, 1.0]
   label_smoothing: 0.01
 
 model_arch: convnext
 num_classes: 2
-output_dir: /home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_cardiomegaly_exp16
+output_dir: /home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_pleural_effusion_exp2
 device: cuda

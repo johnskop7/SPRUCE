@@ -291,7 +291,8 @@ class Trainer:
             'cardiomegaly': ['Cardiomegaly', 'Normal'],
             'lung_opacity': ['Lung_Opacity', 'Normal'],
             'oct': ['CNV', 'DME', 'DRUSEN', 'NORMAL'],
-            'dementia': ['Mild Impairment', 'Moderate Impairment', 'No Impairment', 'Very Mild Impairment']
+            'dementia': ['Mild Impairment', 'Moderate Impairment', 'No Impairment', 'Very Mild Impairment'],
+            'pleural_effusion': ['Pleural Effusion', 'Normal']
         }
         labels = label_map.get(self.cfg.data.dataset_type, [])
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=labels, yticklabels=labels)

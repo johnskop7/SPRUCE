@@ -53,7 +53,6 @@ def plot_counterfactual_grid(orig, before, after, diff_before, diff_after, save_
     plt.tight_layout()
     if save_path:
         plt.savefig(save_path)
-        #print(f"Saved comparison grid to {save_path}")
     plt.show()
 
 

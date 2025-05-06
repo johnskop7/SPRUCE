@@ -45,7 +45,8 @@ def load_dataloaders(
         'dementia': {'Mild Impairment': 0,
                      'Moderate Impairment': 1,
                      'No Impairment': 2,
-                     'Very Mild Impairment': 3}
+                     'Very Mild Impairment': 3},
+        'pleural_effusion': {'Pleural Effusion': 0, 'Normal': 1}
     }
     mapping = mapping_dict.get(dataset_type)
 

@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 from torchvision import models
 import pickle
-from models.ConvNeXt import CustomConvNeXt
-from models.ResNet50 import CustomResNet50
+from models.convnext import CustomConvNeXt
+from models.resnet50 import CustomResNet50
 
 def load_classifier_model(classifier_type, model_weights=None, num_classes=2):
     """Loads the specified CNN model with optional pretrained weights."""

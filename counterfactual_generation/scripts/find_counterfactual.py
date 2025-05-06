@@ -21,7 +21,8 @@ from utils.io_utils import (
     tensor_to_numpy
 )
 from utils.optim_utils import latent_vector_optimization
-import PTI.torch_utils
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+import torch_utils
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 os.environ['TORCH_CUDA_ARCH_LIST'] = "8.6" #just to suppress a warning
@@ -34,27 +35,30 @@ def setup_logging(output_dir: str) -> logging.Logger:
     """Configure logging to console + file."""
     os.makedirs(output_dir, exist_ok=True)
     log_path = os.path.join(output_dir, "run.log")
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
 
-    # formatter
-    fmt = logging.Formatter("%(asctime)s %(levelname)-8s %(message)s",
-                            datefmt="%Y-%m-%d %H:%M:%S")
+    # remove any handlers that were added by basicConfig (or imported modules)
+    root = logging.getLogger()
+    root.handlers.clear()
 
-    # console handler
+    root.setLevel(logging.INFO)
+
+    # now add your custom handlers...
+    fmt = logging.Formatter("%(message)s")
+
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.INFO)
     ch.setFormatter(fmt)
-    logger.addHandler(ch)
+    root.addHandler(ch)
 
-    # file handler
     fh = logging.FileHandler(log_path)
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(fmt)
-    logger.addHandler(fh)
+    root.addHandler(fh)
 
-    logger.info(f"Logging to console and {log_path}")
-    return logger
+    root.info(f"Logging to console and {log_path}")
+    return root
+
+
 
 def save_full_config(config_path: str, output_dir: str, logger: logging.Logger) -> None:
     """Copy the YAML config into the experiment directory for record."""

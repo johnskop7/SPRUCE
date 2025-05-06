@@ -16,7 +16,7 @@ from utils.piece_utils import (
     modifying_exceptional_features
 )
 from utils.io_utils import load_reconstructed_image
-import PTI.torch_utils
+import torch_utils
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 os.environ['TORCH_CUDA_ARCH_LIST'] = "8.6" #just to suppress a warning

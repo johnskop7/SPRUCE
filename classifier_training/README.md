@@ -209,14 +209,6 @@ python scripts/save_images.py \
 
 ---
 
-## Contributing
-
-* Add new architectures under `models/`
-* Extend data loaders in `data/`
-* Improve training strategies & callbacks in `training/`
-
----
-
 ## License
 
 This project is licensed under the MIT License.
