@@ -15,17 +15,17 @@ classifier:
 
 # PIECE settings
 piece:
-  counterfactual_class: 0
+  counterfactual_class: 1
   class_activations: "/home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_pleural_effusion_exp2/class_activations.pkl"
   alpha: 0.05
   n_components: 5
 
 # Optimization
 opt:
-  lr: 0.02
+  lr: 0.01
   epochs: 200
   lambda_piece: 1.0
-  lambda_perc: 0.005
-  lambda_latent: 1e-4
-  lambda_image: 1e-7
+  lambda_perc: 0.01
+  lambda_latent: 1e-3
+  lambda_image: 1e-5
   image_size: 256

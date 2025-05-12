@@ -1,14 +1,14 @@
 # configs/activations.yaml
 data:
-  data_dir: "/home/ubuntu/chexpert_pleural_effusion_normal"
+  data_dir: "/home/ubuntu/chexpert_cardiomegaly_normal"
   batch_size: 64
   image_size: 256
-  dataset_type: pleural_effusion
+  dataset_type: cardiomegaly
 
 model:
-  arch: convnext             # or resnet50
+  arch: efficientnet
   num_classes: 2
-  weights: "/home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_pleural_effusion_exp2/best_model.pth"
+  weights: "/home/ubuntu/classifier_training_scripts/efficientnet_trades_chexpert_cardiomegaly_exp1/best_model.pth"
 
 extract:
-  save_path: "/home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_pleural_effusion_exp2/class_activations.pkl"
+  save_path: "/home/ubuntu/classifier_training_scripts/efficientnet_trades_chexpert_cardiomegaly_exp1/class_activations.pkl"

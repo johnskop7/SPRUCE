@@ -288,12 +288,13 @@ def precompute_gmms_for_class(dist_data,
                                   value=0.0,
                                   p_value=alpha,
                                   n_components=n_components)
-        else:
+        elif classifier_type in ('convnext', 'efficientnet'):
             gmm_obj = GMMConvNeXt(column,
                                   value=0.0,
                                   p_value=alpha,
                                   n_components=n_components)
-
+        else:
+            raise ValueError(f"Unknown classifier_type: {classifier_type}")
         gmms.append(gmm_obj)
     return gmms
 
@@ -328,10 +329,14 @@ def acquire_feature_probabilities(
         query_features = features[0].detach().cpu().numpy()  # shape [n_features,]
 
     # Class-specific final-layer weights (for sign checks, etc.)
+
     if classifier_type == 'resnet50':
         digit_weights = classifier.model.fc.weight.detach().cpu().numpy()[target_class]
     elif classifier_type == 'convnext':
         digit_weights = classifier.convnext.classifier[2].weight.detach().cpu().numpy()[target_class]
+    elif classifier_type == 'efficientnet':
+      # our CustomEfficientNetB3 stores the head in backbone.classifier[1]
+        digit_weights = classifier.backbone.classifier[1].weight.detach().cpu().numpy()[target_class]
     else:
         raise ValueError(f"Unknown classifier_type: {classifier_type}")
 
@@ -391,10 +396,14 @@ def filter_df_of_exceptional_noise(df, target_class, classifier, alpha=0.05, cla
     df['flag'] = np.zeros(df.shape[0])
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     if classifier_type == 'resnet50':
         digit_weights = classifier.model.fc.weight.detach().cpu().numpy()[target_class]
     elif classifier_type == 'convnext':
         digit_weights = classifier.convnext.classifier[2].weight.detach().cpu().numpy()[target_class]
+    elif classifier_type == 'efficientnet':
+      # our CustomEfficientNetB3 stores the head in backbone.classifier[1]
+        digit_weights = classifier.backbone.classifier[1].weight.detach().cpu().numpy()[target_class]
     else:
         raise ValueError(f"Unknown classifier_type: {classifier_type}")
 

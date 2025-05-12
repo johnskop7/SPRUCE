@@ -6,6 +6,8 @@ from torchvision import models
 import pickle
 from models.convnext import CustomConvNeXt
 from models.resnet50 import CustomResNet50
+from models.efficientnet import CustomEfficientNetB3
+
 
 def load_classifier_model(classifier_type, model_weights=None, num_classes=2):
     """Loads the specified CNN model with optional pretrained weights."""
@@ -13,6 +15,8 @@ def load_classifier_model(classifier_type, model_weights=None, num_classes=2):
         model = CustomResNet50(num_classes)
     elif classifier_type == "convnext":
         model = CustomConvNeXt(num_classes)
+    elif classifier_type == "efficientnet":
+        model = CustomEfficientNetB3(num_classes)
     else:
         raise ValueError("Unsupported classifier_type type. Choose from  'convnext', 'resnet50'.")
 

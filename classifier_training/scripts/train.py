@@ -12,6 +12,7 @@ from data.loaders import load_dataloaders
 from training.trainer import Trainer
 from models.convnext import CustomConvNeXt
 from models.resnet50 import CustomResNet50
+from models.efficientnet import CustomEfficientNetB3
 
 
 def main():
@@ -50,6 +51,8 @@ def main():
         model = CustomConvNeXt(num_classes=cfg.num_classes)
     elif cfg.model_arch.lower() == 'resnet50':
         model = CustomResNet50(num_classes=cfg.num_classes)
+    elif cfg.model_arch.lower() == 'efficientnet':
+        model = CustomEfficientNetB3(num_classes=cfg.num_classes)
     else:
         raise ValueError(f"Unsupported model architecture: {cfg.model_arch}")
 
