@@ -119,6 +119,7 @@ def process_counterfactual(
         w_plus_init=ws,
         device=device,
         classifier=classifier,
+        #target_class=1,
         ideal_xp=cf_x,
         original_image=orig_np,
         epochs=epochs,
@@ -162,24 +163,27 @@ def process_counterfactual(
     black_image = np.zeros_like(orig_np)
     diff_orig_vs_inverted_np = compute_difference_image(orig_np, inv_np)
     diff_orig_vs_counterfactual_np = compute_difference_image(orig_np, cf_np)
+    diff_inverted_np_vs_counterfactual_np = compute_difference_image(inv_np,cf_np)
 
     # -- save comparison grid --
     comp_dir = os.path.join(output_dir, "cf_comparisons")
     os.makedirs(comp_dir, exist_ok=True)
     comp_path = os.path.join(comp_dir, f"{image_name}_comparison.png")
 
-    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    fig, axes = plt.subplots(2, 4, figsize=(15, 10))
     images = [
-        orig_np, inv_np, cf_np,
-        black_image, diff_orig_vs_inverted_np, diff_orig_vs_counterfactual_np
+        orig_np, inv_np, cf_np,black_image,
+        black_image, diff_orig_vs_inverted_np, diff_orig_vs_counterfactual_np,diff_inverted_np_vs_counterfactual_np
     ]
     titles = [
         "Original Image",
         "Inverted Original",
         "Counterfactual Image",
         "",
+        "",
         "Diff: Orig vs Inverted",
-        "Diff: Orig vs Counterfactual"
+        "Diff: Orig vs Counterfactual",
+        "Diff: Inverted vs Counterfactual"
     ]
     for ax, img, title in zip(axes.flat, images, titles):
         if "Diff" in title:

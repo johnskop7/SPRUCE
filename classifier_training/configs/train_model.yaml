@@ -1,11 +1,11 @@
 data:
-  data_dir: /home/ubuntu/chexpert_cardiomegaly_normal
-  batch_size: 16
+  data_dir: /home/ubuntu/chexpert_cardiomegaly_normal_big
+  batch_size: 32
   image_size: 256
   dataset_type: cardiomegaly
 
 optim:
-  lr: 1e-4
+  lr: 5e-4
   weight_decay: 1e-2
   optimizer: adamw
   scheduler: cosine
@@ -14,10 +14,10 @@ optim:
   gamma: 0.1
 
 adv:
-  method: trades
+  method: plain
   beta: 6
-  epsilon: 0.031
-  alpha: 0.0031
+  epsilon: 0.016
+  alpha: 0.0016
   pgd_steps: 10
   norm: l_inf
   adv_eval_freq: 5
@@ -25,10 +25,10 @@ adv:
 train:
   epochs: 100
   patience: 10
-  class_weights: [1.0, 1.0]
+  class_weights: [1.0, 1.382]
   label_smoothing: 0.01
 
 model_arch: efficientnet
 num_classes: 2
-output_dir: /home/ubuntu/classifier_training_scripts/efficientnet_trades_chexpert_cardiomegaly_exp1
+output_dir: /home/ubuntu/classifier_training_scripts/efficientnetb0_plain_chexpert_cardiomeagly_normal_big_exp2
 device: cuda

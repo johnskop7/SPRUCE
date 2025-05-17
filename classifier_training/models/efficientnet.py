@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torchvision.models import efficientnet_b3, EfficientNet_B3_Weights
+from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
 
 class CustomEfficientNetB3(nn.Module):
     def __init__(self, num_classes=2, pretrained=True):
@@ -14,10 +14,10 @@ class CustomEfficientNetB3(nn.Module):
         super().__init__()
         # 1) Load base model
         if pretrained:
-            weights = EfficientNet_B3_Weights.IMAGENET1K_V1
-            self.backbone = efficientnet_b3(weights=weights)
+            weights = EfficientNet_B0_Weights.IMAGENET1K_V1
+            self.backbone = efficientnet_b0(weights=weights)
         else:
-            self.backbone = efficientnet_b3(weights=None)
+            self.backbone = efficientnet_b0(weights=None)
 
         # 2) Replace classifier head
         #    original classifier is: [Dropout, Linear(in_features, 1000)]

@@ -123,6 +123,121 @@ def latent_vector_optimization(
 
     return w_e.detach(), images_for_gif
 
+# def latent_vector_optimization(
+#     generator,
+#     w_plus_init: torch.Tensor,
+#     device: torch.device,
+#     classifier: nn.Module,
+#     target_class: int,
+#     original_image,              # PIL Image or NumPy array
+#     epochs: int = 100,
+#     learning_rate: float = 1e-2,
+#     lambda_class: float = 1.0,
+#     lambda_perc: float = 0.5,
+#     lambda_latent: float = 0.01,
+#     lambda_image: float = 0.1,
+#     image_size: int = 256,
+#     normalized: bool = False
+# ):
+#     lambda_class = float(lambda_class)
+#     lambda_perc = float(lambda_perc)
+#     lambda_latent = float(lambda_latent)
+#     lambda_image = float(lambda_image)
+#     """
+#     Optimize a StyleGAN latent (W+) to produce an image that the classifier
+#     will assign to `target_class`, while staying perceptually close to the
+#     original image and not drifting too far in latent space.
+#     """
+#
+#     # 1) Preprocess the original image into [-1,1]
+#     preprocess_orig = transforms.Compose([
+#         transforms.ToTensor(),
+#         transforms.Resize((image_size, image_size)),
+#         transforms.Normalize([0.5]*3, [0.5]*3),
+#     ])
+#     orig_tensor = preprocess_orig(original_image).unsqueeze(0).to(device)  # [1,3,H,W]
+#
+#     # 2) Make a trainable copy of the latent
+#     w_opt = w_plus_init.clone().detach().to(device)
+#     w_opt.requires_grad_(True)
+#
+#     # 3) Optimizer + LR scheduler
+#     optimizer = optim.AdamW([w_opt], lr=learning_rate, betas=(0.9, 0.99))
+#     scheduler = optim.lr_scheduler.CosineAnnealingLR(
+#         optimizer, T_max=epochs, eta_min=1e-6
+#     )
+#
+#     # 4) Loss components
+#     lpips_fn   = lpips.LPIPS(net='vgg').to(device)
+#     ce_loss    = nn.CrossEntropyLoss()
+#     l1_loss    = nn.L1Loss(reduction='sum')  # we'll normalize manually
+#
+#     # Prepare the constant target tensor
+#     target_tensor = torch.full((1,), target_class, dtype=torch.long, device=device)
+#
+#     # For debugging / visualization
+#     images_for_gif = []
+#
+#     for epoch in range(epochs):
+#         optimizer.zero_grad()
+#
+#         # --- synthesize image from current latent
+#         synth = generator.synthesis(w_opt, noise_mode='const', force_fp32=True)
+#         # synth is in [-1,1]
+#
+#         # --- perceptual LPIPS loss vs original
+#         lpips_val = lpips_fn(synth, orig_tensor).mean()
+#
+#         # --- pixel‐wise L1 loss (sum over all pixels)
+#         l1_img_val = l1_loss(synth, orig_tensor)
+#         # you could normalize: l1_img_val = l1_img_val / synth.numel()
+#
+#         # --- prepare for classifier: shift to [0,1]
+#         img01 = (synth * 0.5 + 0.5).clamp(0, 1)
+#         if normalized:
+#             img_in = preprocess_for_classifier(img01)
+#         else:
+#             img_in = img01
+#
+#         # --- classification loss toward the target_class
+#         logits, _ = classifier(img_in, return_features=True)
+#         class_val = ce_loss(logits, target_tensor)
+#
+#         # --- latent‐space L1 drift regularization
+#         latent_drift = l1_loss(w_opt, w_plus_init.to(device))
+#
+#         # --- total loss
+#         loss = (
+#                 class_val * lambda_class +
+#                 lpips_val * lambda_perc +
+#                 latent_drift * lambda_latent +
+#                 l1_img_val * lambda_image
+#         )
+#
+#         # backward & step
+#         loss.backward()
+#         torch.nn.utils.clip_grad_norm_([w_opt], max_norm=1.0)
+#         optimizer.step()
+#         scheduler.step()
+#
+#         # record for gif
+#         with torch.no_grad():
+#             probs = torch.softmax(logits, dim=1).cpu()
+#             images_for_gif.append((img_in.squeeze(0).cpu(), probs))
+#
+#         # logging every 10 epochs
+#         if epoch % 10 == 0:
+#             logging.getLogger().info(
+#                 f"[Epoch {epoch}/{epochs}] "
+#                 f"TotalLoss={loss.item():.4f} | "
+#                 f"ClassLoss={class_val.item():.4f} | "
+#                 f"LPIPS={lpips_val.item():.4f} | "
+#                 f"LatentDrift={latent_drift.item():.4f} | "
+#                 f"L1Img={l1_img_val.item():.4f}"
+#             )
+#
+#     return w_opt.detach(), images_for_gif
+
 
 def total_variation_isotropic(x):
     """Calculates the total isotropic variation of an image.
