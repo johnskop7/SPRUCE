@@ -108,23 +108,69 @@ The resulting image aims to alter the classifier's decision while remaining visu
 
 ---
 
-## Counterfactual Transitions
+## Interactive Semifactual Explorer
 
 SPRUCE optimizes the latent representation gradually from the inverted original image toward the final counterfactual.
 
-Intermediate points along this trajectory can be interpreted as **semifactuals**, illustrating how the classifier's prediction changes as increasingly meaningful modifications are introduced.
+Intermediate points along this optimization trajectory can be inspected as **semifactuals**. Rather than presenting the transition only as a fixed animation, we provide an interactive viewer that allows readers to move freely through the trajectory, inspect individual frames, and follow the corresponding classifier scores embedded in each frame.
+
+<p align="center">
+  <a href="https://johnskop7.github.io/SPRUCE/" target="_blank">
+    <strong>▶ Open the Interactive Semifactual Explorer</strong>
+  </a>
+</p>
+
+The viewer supports:
+
+- free scrubbing through the complete optimization trajectory
+- previous-frame and next-frame navigation
+- play / pause controls
+- frame and timestamp readouts
+- direct comparison of the evolving image with the classifier confidence scores
 
 ### Cardiomegaly → Normal
 
 <p align="center">
-  <img src="assets/gifs/cardiomegaly_to_normal.gif" alt="Cardiomegaly to Normal counterfactual transition" width="700">
+  <a href="https://johnskop7.github.io/SPRUCE/?case=cardiomegaly" target="_blank">
+    <img src="assets/previews/cardiomegaly_preview.png" alt="Interactive Cardiomegaly to Normal semifactual trajectory" width="700">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://johnskop7.github.io/SPRUCE/?case=cardiomegaly" target="_blank">
+    <strong>Inspect this trajectory interactively →</strong>
+  </a>
 </p>
 
 ### Lung Opacity → Normal
 
 <p align="center">
-  <img src="assets/gifs/lung_opacity_to_normal.gif" alt="Lung Opacity to Normal counterfactual transition" width="700">
+  <a href="https://johnskop7.github.io/SPRUCE/?case=lung-opacity" target="_blank">
+    <img src="assets/previews/lung_opacity_preview.png" alt="Interactive Lung Opacity to Normal semifactual trajectory" width="700">
+  </a>
 </p>
+
+<p align="center">
+  <a href="https://johnskop7.github.io/SPRUCE/?case=lung-opacity" target="_blank">
+    <strong>Inspect this trajectory interactively →</strong>
+  </a>
+</p>
+
+### Retinal OCT
+
+<p align="center">
+  <a href="https://johnskop7.github.io/SPRUCE/?case=oct" target="_blank">
+    <img src="assets/previews/oct_preview.png" alt="Interactive OCT semifactual trajectory" width="700">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://johnskop7.github.io/SPRUCE/?case=oct" target="_blank">
+    <strong>Inspect this trajectory interactively →</strong>
+  </a>
+</p>
+
+> The interactive viewer is intended to make the optimization path itself inspectable: readers can stop at any intermediate state and examine how the visual evidence and the classifier prediction evolve before the final counterfactual is reached.
 
 ---
 
@@ -220,8 +266,12 @@ SPRUCE/
 │
 ├── assets/
 │   ├── framework/
-│   ├── gifs/
-│   └── examples/
+│   ├── examples/
+│   ├── previews/
+│   └── videos/
+│
+├── docs/
+│   └── Interactive semifactual explorer (GitHub Pages)
 │
 ├── requirements.txt
 ├── LICENSE
