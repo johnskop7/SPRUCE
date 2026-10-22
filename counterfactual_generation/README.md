@@ -465,7 +465,7 @@ such that the generated image approaches the desired counterfactual classifier r
 
 The counterfactual latent is optimized using a combination of four objectives:
 
-\[
+```math
 \mathcal{L}
 =
 \lambda_{\mathrm{piece}}\mathcal{L}_{\mathrm{piece}}
@@ -475,8 +475,8 @@ The counterfactual latent is optimized using a combination of four objectives:
 \lambda_{\mathrm{latent}}\mathcal{L}_{\mathrm{latent}}
 +
 \lambda_{\mathrm{image}}\mathcal{L}_{\mathrm{image}}
-\]
 
+```
 ### Counterfactual feature-alignment loss
 
 \[
