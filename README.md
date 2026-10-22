@@ -342,16 +342,18 @@ The final output includes:
 
 ## Pretrained Models
 
-Pretrained model weights for selected experiments are provided separately because of their size.
+Pretrained model weights used in the SPRUCE experiments are hosted on Google Drive.
 
 | Model | Dataset | Resolution | Download |
 |---|---|---:|---|
-| StyleGAN2-ADA | Chest X-rays / Cardiomegaly | 256 × 256 | Coming soon |
-| StyleGAN2-ADA | Retinal OCT | 256 × 256 | Coming soon |
-| StyleGAN2-ADA | Brain MRI | 128 × 128 | Coming soon |
-| ConvNeXt-Base | Lung Opacity | 256 × 256 | Coming soon |
-| ConvNeXt-Base + TRADES | Lung Opacity | 256 × 256 | Coming soon |
-| ConvNeXt-Base | Cardiomegaly | 256 × 256 | Coming soon |
+| StyleGAN2-ADA | CheXpert | 256 × 256 | [Google Drive](https://drive.google.com/file/d/1aEZ0tyG06wYFUiRjk6n3cTWZ4G6fBlLP/view?usp=sharing) |
+| StyleGAN2-ADA | Retinal OCT | 256 × 256 | [Google Drive](https://drive.google.com/file/d/1EsFR20QJaKfgX2SapvVglUT4K08--ABB/view?usp=sharing) |
+| E4E encoder | CheXpert | 256 × 256 | [Google Drive](https://drive.google.com/file/d/1DcKFqAWZK7cwtJ7quFKj6O_NTK2HTzhY/view?usp=sharing) |
+| E4E encoder | Retinal OCT | 256 × 256 | [Google Drive](https://drive.google.com/file/d/1GJeexhOtL4NsrnmK0VaBFoQ-tBn5imoU/view?usp=sharing) |
+| ConvNeXt-Base | Lung Opacity - Normal | 256 × 256 | [Google Drive](https://drive.google.com/file/d/1cCa1qdYxzeRYhVjE2sgtHWcwSl8be6iE/view?usp=sharing) |
+| ConvNeXt-Base + TRADES | Lung Opacity - Normal | 256 × 256 | [Google Drive](https://drive.google.com/file/d/16bq6QojvVUxrLLaf5Iai677iGucYyave/view?usp=sharing) |
+| ConvNeXt-Base | Cardiomegaly - Normal | 256 × 256 | [Google Drive](https://drive.google.com/file/d/1aCqQ3f981QgpZ5PTB6Uz4YY_GtBoK9mw/view?usp=sharing) |
+| ConvNeXt-Base + TRADES | Cardiomegaly - Normal | 256 × 256 | [Google Drive](https://drive.google.com/file/d/1wnTY_abIYLOGlU9HkZzNQpEKDmhs_11f/view?usp=drive_link) |
 
 The pretrained GANs can be reused with compatible classifiers trained on the corresponding image domain.
 
