@@ -369,17 +369,28 @@ Presented at **SETN 2026**.
 
 ---
 
-## Acknowledgements
+## References and Acknowledgements
 
-SPRUCE builds upon several important open-source projects and research contributions, including:
+SPRUCE builds upon several important research contributions and open-source implementations:
 
-- **PIECE** — exceptional-feature-based counterfactual and semifactual explanations
-- **StyleGAN2-ADA** — high-quality generative modeling with adaptive discriminator augmentation
-- **E4E** — editable encoder-based StyleGAN inversion
-- **Pivotal Tuning Inversion (PTI)** — high-fidelity reconstruction while preserving latent editability
-- **TRADES** — adversarial training for improved classifier robustness
+- **PIECE** — Eoin M. Kenny and Mark T. Keane, *On Generating Plausible Counterfactual and Semi-Factual Explanations for Deep Learning*.
+  [arXiv:2009.06399](https://arxiv.org/abs/2009.06399)
 
-Please refer to the original publications and repositories when using these components.
+- **StyleGAN2-ADA** — Tero Karras, Miika Aittala, Janne Hellsten, Samuli Laine, Jaakko Lehtinen, and Timo Aila, *Training Generative Adversarial Networks with Limited Data*.
+  [arXiv:2006.06676](https://arxiv.org/abs/2006.06676)
+
+- **TRADES** — Hongyang Zhang, Yaodong Yu, Jiantao Jiao, Eric P. Xing, Laurent El Ghaoui, and Michael I. Jordan, *Theoretically Principled Trade-off between Robustness and Accuracy*.
+  [arXiv:1901.08573](https://arxiv.org/abs/1901.08573)
+
+- **E4E** — Omer Tov, Yuval Alaluf, Yotam Nitzan, Or Patashnik, and Daniel Cohen-Or, *Designing an Encoder for StyleGAN Image Manipulation*.
+  [arXiv:2102.02766](https://arxiv.org/abs/2102.02766)
+
+- **Pivotal Tuning Inversion (PTI)** — Daniel Roich, Ron Mokady, Amit H. Bermano, and Daniel Cohen-Or, *Pivotal Tuning for Latent-based Editing of Real Images*.
+  [arXiv:2106.05744](https://arxiv.org/abs/2106.05744) · [Official implementation](https://github.com/danielroich/PTI)
+
+The inversion code under [PTI/](PTI/) is **inspired by and incorporates portions of the official PTI implementation**, adapted for the SPRUCE medical-imaging inversion workflow. The original PTI implementation is licensed under the MIT License; its copyright and license notice are preserved in [PTI/LICENSE-PTI](PTI/LICENSE-PTI).
+
+Please cite the corresponding original works when using these components.
 
 ---
 
