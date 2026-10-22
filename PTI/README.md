@@ -356,14 +356,35 @@ The counterfactual optimization then starts from the PTI pivot rather than from 
 
 ---
 
+## Code Attribution
+
+The inversion code in this directory is **inspired by and incorporates parts of the official Pivotal Tuning Inversion (PTI) implementation** by Daniel Roich, Ron Mokady, Amit H. Bermano, and Daniel Cohen-Or:
+
+- Official PTI repository: https://github.com/danielroich/PTI
+- PTI paper: https://arxiv.org/abs/2106.05744
+
+The code has been adapted for the SPRUCE medical-imaging workflow, including the use of domain-specific StyleGAN2-ADA generators, E4E encoders, medical-image inputs, and the downstream SPRUCE counterfactual-generation pipeline.
+
+The original PTI implementation is distributed under the MIT License. Its copyright and license notice are preserved in [LICENSE-PTI](LICENSE-PTI).
+
+---
+
 ## References
 
-This implementation builds on:
+The inversion pipeline builds on the following works:
 
-- **Pivotal Tuning Inversion (PTI)** for high-fidelity GAN inversion
-- **E4E** for editable encoder-based StyleGAN inversion
-- **StyleGAN2-ADA** for the underlying generator
+- **Daniel Roich, Ron Mokady, Amit H. Bermano, Daniel Cohen-Or.**
+  *Pivotal Tuning for Latent-based Editing of Real Images.*
+  https://arxiv.org/abs/2106.05744
 
-Please cite the corresponding original works when using these components.
+- **Omer Tov, Yuval Alaluf, Yotam Nitzan, Or Patashnik, Daniel Cohen-Or.**
+  *Designing an Encoder for StyleGAN Image Manipulation.*
+  https://arxiv.org/abs/2102.02766
+
+- **Tero Karras, Miika Aittala, Janne Hellsten, Samuli Laine, Jaakko Lehtinen, Timo Aila.**
+  *Training Generative Adversarial Networks with Limited Data.*
+  https://arxiv.org/abs/2006.06676
+
+For the complete set of SPRUCE references, including PIECE and TRADES, see the [main repository README](../README.md).
 
 For the complete SPRUCE pipeline, return to the [main repository README](../README.md).
