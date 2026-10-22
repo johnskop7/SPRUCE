@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SPRUCE Semifactual Explorer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">SPRUCE · Interactive Results</p>
+      <h1>Semifactual Explorer</h1>
+      <p>
+        Scrub through the optimization trajectory to inspect intermediate
+        semifactuals and the evolution of the classifier scores.
+      </p>
+    </header>
+
+    <section class="panel">
+      <div class="toolbar">
+        <label for="caseSelect">Example</label>
+        <select id="caseSelect">
+          <option value="cardiomegaly">Cardiomegaly → Normal</option>
+          <option value="lung-opacity">Lung Opacity → Normal</option>
+          <option value="oct">OCT counterfactual</option>
+        </select>
+      </div>
+
+      <div class="video-shell">
+        <video id="trajectoryVideo" preload="metadata" playsinline>
+          Your browser does not support HTML5 video.
+        </video>
+      </div>
+
+      <div class="scrubber-wrap">
+        <input id="scrubber" type="range" min="0" max="1000" value="0" step="1" />
+        <div class="readout">
+          <span id="frameLabel">Frame 0</span>
+          <span id="timeLabel">0.00 s</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="prevFrame" type="button">◀ Previous frame</button>
+        <button id="playPause" type="button">Play</button>
+        <button id="nextFrame" type="button">Next frame ▶</button>
+      </div>
+
+      <p class="hint">
+        Tip: drag the slider for coarse navigation, then use the frame buttons for
+        fine inspection. Classifier scores are embedded directly in the video frames.
+      </p>
+    </section>
+
+    <section class="about">
+      <h2>What is a semifactual?</h2>
+      <p>
+        During SPRUCE latent optimization, the image moves from the inverted original
+        toward the final counterfactual. Intermediate states along this trajectory can
+        be inspected as semifactuals, revealing how image content and the classifier
+        response evolve before the final class transition.
+      </p>
+    </section>
+  </main>
+
+  <script src="viewer.js"></script>
+</body>
+</html>
