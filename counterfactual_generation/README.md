@@ -479,9 +479,9 @@ The counterfactual latent is optimized using a combination of four objectives:
 ```
 ### Counterfactual feature-alignment loss
 
-\[
+```math
 \mathcal{L}_{\mathrm{piece}}
-\]
+```
 
 encourages the classifier representation of the generated image to approach the PIECE-derived counterfactual feature vector.
 
@@ -489,17 +489,17 @@ This is the main term driving the prediction toward the desired counterfactual s
 
 ### LPIPS perceptual loss
 
-\[
+```math
 \mathcal{L}_{\mathrm{LPIPS}}
-\]
+```
 
 encourages perceptual similarity between the generated counterfactual and the original image.
 
 ### Latent-space regularization
 
-\[
+```math
 \mathcal{L}_{\mathrm{latent}}
-\]
+```
 
 penalizes large deviations from the PTI pivot latent.
 
@@ -507,9 +507,9 @@ This helps preserve the local latent neighborhood associated with the original p
 
 ### Image-space sparsity
 
-\[
+```math
 \mathcal{L}_{\mathrm{image}}
-\]
+```
 
 penalizes pixel-level differences between the original and generated image.
 
