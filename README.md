@@ -367,28 +367,6 @@ Presented at **SETN 2026**.
 
 ---
 
-## Citation
-
-If you find this code or framework useful in your research, please cite:
-
-```bibtex
-@inproceedings{litsos2026spruce,
-  title     = {SPRUCE: SParse Realistic Uncoupled Counterfactual Explanations in Medical Imaging},
-  author    = {Litsos, Ioannis and
-               Liartis, Jason and
-               Theofilou, Paraskevi-Antonia and
-               Spanos, Nikolaos and
-               Tzouveli, Paraskevi and
-               Voulodimos, Athanasios},
-  booktitle = {Proceedings of SETN 2026},
-  year      = {2026}
-}
-```
-
-The final DOI and ACM publication information can be added once the official proceedings metadata is available.
-
----
-
 ## Acknowledgements
 
 SPRUCE builds upon several important open-source projects and research contributions, including:
