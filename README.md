@@ -126,8 +126,6 @@ Intermediate points along this trajectory can be interpreted as **semifactuals**
   <img src="assets/gifs/lung_opacity_to_normal.gif" alt="Lung Opacity to Normal counterfactual transition" width="700">
 </p>
 
-The transition visualizations can also include the corresponding classifier probabilities, making it possible to follow the prediction as the latent optimization progresses.
-
 ---
 
 ## Qualitative Results
