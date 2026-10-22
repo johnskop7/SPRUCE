@@ -174,10 +174,10 @@ The experiments presented in the paper use four medical imaging settings.
 
 | Dataset | Task | Resolution |
 |---|---|---:|
-| RSNA Pneumonia | Healthy vs Lung Opacity | 256 × 256 |
-| RSNA + NIH Chest X-ray | Healthy vs Cardiomegaly | 256 × 256 |
-| Retinal OCT | Normal / CNV / DME / Drusen | 256 × 256 |
-| Brain MRI Dementia | No / Very Mild / Mild / Moderate Impairment | 128 × 128 |
+| RSNA Pneumonia | [Healthy vs Lung Opacity](https://drive.google.com/file/d/11nbNlp5rJzuCOU6gujRgQ4iUKygA4UTO/view?usp=sharing) | 256 × 256 |
+| RSNA + NIH Chest X-ray | [Healthy vs Cardiomegaly](https://drive.google.com/file/d/1FU8wol9OiBbSTVSauNjS7uLYk-7ZDdq3/view?usp=sharing) | 256 × 256 |
+| Retinal OCT | [Normal / CNV / DME / Drusen](https://drive.google.com/file/d/1gp_37EvzVMdhxnXiibVWFE45P0uSA0DS/view?usp=sharing) | 256 × 256 |
+| Brain MRI Dementia | [No / Very Mild / Mild / Moderate Impairment](https://drive.google.com/file/d/1gzQoiq3tfLBA_S2P3bYMWyYIGZdEot1f/view?usp=sharing) | 128 × 128 |
 
 ---
 
