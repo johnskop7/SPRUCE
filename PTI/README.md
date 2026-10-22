@@ -116,7 +116,7 @@ Edit:
 PTI/configs/paths_config.py
 ```
 
-The file currently contains machine-specific example paths from the experiments and **must be adapted to your environment**.
+Adapt the following paths to your environment.
 
 The relevant entries are:
 
@@ -139,20 +139,6 @@ input_data_id = "experiment_name"
 pti_results_keyword = "PTI"
 e4e_results_keyword = "e4e"
 ```
-
-### Meaning of the main paths
-
-| Variable | Purpose |
-|---|---|
-| `e4e` | E4E encoder checkpoint used to obtain the initial W+ pivot |
-| `stylegan2_ada` | pretrained StyleGAN2-ADA generator for the corresponding medical image domain |
-| `checkpoints_dir` | destination for the per-image PTI-tuned generators |
-| `embedding_base_dir` | root directory for saved latent pivots |
-| `input_data_path` | directory containing the query images |
-| `input_data_id` | experiment/dataset identifier used in the output directory hierarchy |
-
-The current configuration is an example from the original experimental environment and should not be treated as a portable default.
-
 ---
 
 ## 2. Configure PTI Hyperparameters
@@ -247,8 +233,6 @@ run_PTI(
     use_multi_id_training=False
 )
 ```
-
-For the SPRUCE workflow, **single-ID training** is the relevant mode because a separate generator is tuned for each query image.
 
 ---
 
