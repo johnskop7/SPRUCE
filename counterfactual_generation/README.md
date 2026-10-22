@@ -14,13 +14,14 @@ latent space optimization.
 
 counterfactual\_generation/
 ├── configs/
-│   └── config.yaml             # single YAML config for all scripts
+│   └── counterfactual_config.yaml             # single YAML config for all scripts
 ├── scripts/
 │   ├── batch_process_inversion.py  # saves the reconstructed images and compares them to the original ones
 │   ├── compute_ideal_xp.py         # computes and saves the counterfactual feature vectors for each image
 │   └── find_counterfactual.py      # latent‐space optimization → generates final counterfactual images
 ├── models/
-│   ├── convnext.py      # ConvNeXt wrapper 
+│   ├── convnext.py      # ConvNeXt wrapper
+|   ├── efficientnet.py  # EfficientNet wrapper
 │   └── resnet50.py      # ResNet50 wrapper 
 ├── utils/
 │   ├── io_utils.py              # image I/O, differencing, grid plotting
@@ -35,7 +36,7 @@ counterfactual\_generation/
 
 ---
 
-## ⚙️ Configuration (`configs/config.yaml`)
+## ⚙️ Configuration (`configs/counterfactual_config.yaml`)
 
 All three scripts share one YAML file. Example structure:
 
@@ -48,7 +49,7 @@ gan:
   output_dir:          "/path/to/output_folder/"
 
 classifier:
-  arch:        "convnext"      # or "resnet50"
+  arch:        "convnext"      
   weights:     "/path/to/classifier.pth"
   num_classes: 2
   normalized:  true
