@@ -23,7 +23,8 @@ classifier_training_scripts/
 │   ├── trades.py              # implementation of TRADES loss based on https://github.com/yaodongyu/TRADES
 ├── models/
 │   ├── convnext.py            # ConvNeXt wrapper
-│   └── resnet50.py            # ResNet50 wrapper
+│   |── resnet50.py            # ResNet50 wrapper
+|   └── efficientnet.py        # EfficientNet wrapper
 ├── training/
 │   ├── trainer.py             # encapsulates the full train–validate–save loop in one class called Trainer
 │   ├── callbacks.py           # `EarlyStopping` & `ModelCheckpoint`
