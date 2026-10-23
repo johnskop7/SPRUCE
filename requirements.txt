@@ -1,0 +1,25 @@
+# Core deep learning
+torch>=2.0
+torchvision>=0.15
+
+# Scientific Python
+numpy>=1.23
+scipy>=1.9
+pandas>=1.5
+scikit-learn>=1.2
+
+# Image processing and visualization
+Pillow>=9.0
+opencv-python>=4.7
+matplotlib>=3.7
+seaborn>=0.12
+
+# Configuration and utilities
+PyYAML>=6.0
+tqdm>=4.65
+
+# Perceptual similarity / GAN inversion
+lpips>=0.1.4
+
+# Optional experiment logging used by PTI
+wandb>=0.15
