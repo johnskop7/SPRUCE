@@ -1,6 +1,7 @@
-# configs/activations.yaml
+# Extract penultimate-layer activations for PIECE
+
 data:
-  data_dir: "/home/ubuntu/chexpert_cardiomegaly_normal_big"
+  data_dir: "/path/to/dataset"
   batch_size: 128
   image_size: 256
   dataset_type: cardiomegaly
@@ -8,7 +9,7 @@ data:
 model:
   arch: convnext
   num_classes: 2
-  weights: "/home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_cardiomeagly_normal_big_exp1/best_model.pth"
+  weights: "/path/to/experiment/best_model.pth"
 
 extract:
-  save_path: "/home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_cardiomeagly_normal_big_exp1/class_activations.pkl"
+  save_path: "/path/to/experiment/class_activations.pkl"
