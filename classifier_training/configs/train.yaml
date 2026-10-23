@@ -1,9 +1,11 @@
+# Dataset
 data:
-  data_dir: /home/ubuntu/chexpert_cardiomegaly_normal_big
+  data_dir: "/path/to/dataset"
   batch_size: 32
   image_size: 256
   dataset_type: cardiomegaly
 
+# Optimizer and learning-rate schedule
 optim:
   lr: 5e-4
   weight_decay: 1e-2
@@ -13,6 +15,7 @@ optim:
   step_size: 30
   gamma: 0.1
 
+# Plain or TRADES training
 adv:
   method: plain
   beta: 6
@@ -22,13 +25,17 @@ adv:
   norm: l_inf
   adv_eval_freq: 5
 
+# Training
 train:
   epochs: 100
   patience: 10
   class_weights: [1.0, 1.382]
   label_smoothing: 0.01
 
-model_arch: efficientnet
+# Model
+model_arch: convnext
 num_classes: 2
-output_dir: /home/ubuntu/classifier_training_scripts/efficientnetb0_plain_chexpert_cardiomeagly_normal_big_exp2
+
+# Output / device
+output_dir: "/path/to/experiment"
 device: cuda
