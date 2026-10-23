@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use SPRUCE in your research, please cite the SPRUCE paper and this repository."
+title: "SPRUCE: SParse Realistic Uncoupled Counterfactual Explanations in Medical Imaging"
+type: software
+authors:
+  - given-names: Ioannis
+    family-names: Litsos
+  - given-names: Jason
+    family-names: Liartis
+  - given-names: Paraskevi-Antonia
+    family-names: Theofilou
+  - given-names: Nikolaos
+    family-names: Spanos
+  - given-names: Paraskevi
+    family-names: Tzouveli
+  - given-names: Athanasios
+    family-names: Voulodimos
+repository-code: "https://github.com/johnskop7/SPRUCE"
+url: "https://github.com/johnskop7/SPRUCE"
+license: MIT
+keywords:
+  - counterfactual explanations
+  - explainable AI
+  - medical imaging
+  - StyleGAN2-ADA
+  - Pivotal Tuning Inversion
+  - PIECE
+  - adversarial robustness
+  - deep learning
+abstract: >-
+  SPRUCE is a framework for generating sparse, realistic, classifier-guided
+  counterfactual explanations for medical images while uncoupling the training
+  of the counterfactual explainer from the classifier under inspection.
