@@ -158,7 +158,7 @@ opt:
   image_size: 256
 ```
 
-The currently committed configuration file contains paths from the original experimental environment and should be adapted before running the code elsewhere.
+Replace the placeholder paths in the configuration file with paths appropriate for your environment.
 
 ---
 
@@ -783,7 +783,7 @@ Implements the W+ latent optimization used to generate the final SPRUCE counterf
 - The `counterfactual_class` must be a valid classifier class index.
 - Optimization hyperparameters are dataset- and classifier-dependent.
 - A CUDA-capable GPU is strongly recommended.
-- The current YAML file in the repository contains absolute paths from the original experimental environment and should be changed before use on another machine.
+- Replace the placeholder paths in the YAML configuration with paths appropriate for your environment.
 - If a corresponding pivot, original image, feature vector, or tuned generator cannot be found, the batch scripts skip that image.
 
 ---
