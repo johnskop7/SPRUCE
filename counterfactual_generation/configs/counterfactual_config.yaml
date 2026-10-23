@@ -1,26 +1,26 @@
-# Paths
+# GAN inversion / PTI artifacts
 gan:
-  original_weights: "/home/ubuntu/results/00021-chexpert_images-paper256-resumecustom/network-snapshot-019353.pkl"
-  checkpoints_dir: "/home/ubuntu/checkpoints/chexpert_cardiomegaly"
-  embeddings_dir: "/home/ubuntu/embeddings/chexpert_cardiomegaly/PTI"
-  original_images_dir: "/home/ubuntu/test_images_chexpert_cardiomegaly"
-  output_dir: "/home/ubuntu/cardiomegaly_to_normal_convnext_exp4"
+  original_weights: "/path/to/stylegan2_ada.pkl"
+  checkpoints_dir: "/path/to/pti_generators"
+  embeddings_dir: "/path/to/pti_embeddings"
+  original_images_dir: "/path/to/query_images"
+  output_dir: "/path/to/counterfactual_experiment"
 
-# classifier model settings
+# Classifier
 classifier:
   type: "convnext"
-  weights: "/home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_cardiomeagly_normal_big_exp1/best_model.pth"
+  weights: "/path/to/classifier/best_model.pth"
   num_classes: 2
   normalized: true
 
-# PIECE settings
+# PIECE
 piece:
   counterfactual_class: 1
-  class_activations: "/home/ubuntu/classifier_training_scripts/convnext_trades_chexpert_cardiomeagly_normal_big_exp1/class_activations.pkl"
+  class_activations: "/path/to/classifier/class_activations.pkl"
   alpha: 0.05
   n_components: 5
 
-# Optimization
+# Latent optimization
 opt:
   lr: 0.02
   epochs: 200
