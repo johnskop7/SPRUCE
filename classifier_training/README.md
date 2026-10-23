@@ -319,7 +319,7 @@ output_dir: "/path/to/experiment"
 device: cuda
 ```
 
-The committed configuration contains paths from the original experimental environment and should be adapted before use on another machine.
+Replace the placeholder paths in the configuration with paths appropriate for your environment.
 
 ---
 
@@ -763,7 +763,7 @@ After these steps, the classifier-side inputs required by SPRUCE are ready.
 
 # Notes
 
-- The committed YAML files contain paths from the original experimental environment and should be changed before use on another machine.
+- Replace the placeholder paths in the YAML files with paths appropriate for your environment.
 - A CUDA-capable GPU is strongly recommended for classifier training and TRADES.
 - The same classifier architecture and weights should be used consistently when extracting activations and later generating counterfactuals.
 - The class indices used during query selection and counterfactual generation should match the dataset mapping.
