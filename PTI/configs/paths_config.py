@@ -1,22 +1,25 @@
-## Pretrained models paths
-e4e = '/home/ubuntu/encoder4editing/chexpert_experiment/checkpoints/best_model.pt'
-stylegan2_ada = '/home/ubuntu/results/00021-chexpert_images-paper256-resumecustom/network-snapshot-019353.pkl'
+"""Paths used by the PTI inversion pipeline.
 
+Replace the placeholders below with paths appropriate for your environment.
+"""
 
-## Dirs for output files
-checkpoints_dir = '/home/ubuntu/checkpoints/chexpert_pleural_effusion'
-embedding_base_dir = '/home/ubuntu/embeddings'
+# Pretrained models
+e4e = "/path/to/e4e_checkpoint.pt"
+stylegan2_ada = "/path/to/stylegan2_ada.pkl"
 
-## Input info
-### Input dir, where the images reside
-input_data_path = '/home/ubuntu/test_images_chexpert_pleural_effusion'
-### Inversion identifier, used to keeping track of the inversion results. Both the latent code and the generator
-input_data_id = 'chexpert_pleural_effusion'
+# Output directories
+checkpoints_dir = "/path/to/pti_generators"
+embedding_base_dir = "/path/to/embeddings"
 
-## Keywords
-pti_results_keyword = 'PTI'
-e4e_results_keyword = 'e4e'
-sg2_results_keyword = 'SG2'
-sg2_plus_results_keyword = 'SG2_plus'
-multi_id_model_type = 'multi_id'
+# Input images
+input_data_path = "/path/to/query_images"
 
+# Experiment identifier used to organize inversion outputs
+input_data_id = "experiment_name"
+
+# Output keywords
+pti_results_keyword = "PTI"
+e4e_results_keyword = "e4e"
+sg2_results_keyword = "SG2"
+sg2_plus_results_keyword = "SG2_plus"
+multi_id_model_type = "multi_id"
